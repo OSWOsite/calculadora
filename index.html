@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Producto - Minimalista</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400&display=swap" rel="stylesheet">
+    
+    <style>
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Fredoka', sans-serif; 
+            text-transform: uppercase; 
+            font-weight: 400;
+        }
+        
+        body { 
+            background-color: #ffffff; 
+            padding: 0; 
+            margin: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; 
+            min-height: 100vh; 
+        }
+        
+        .card { 
+            background: #ffffff; 
+            border-radius: 0; 
+            padding: 0 0 20px 0; 
+            max-width: 400px; 
+            width: 100%; 
+            box-shadow: none; 
+            border: none; 
+        }
+        
+        .info-producto { 
+            margin-bottom: 30px; 
+            text-align: left; 
+        }
+        
+        .categoria { 
+            font-size: 24px; 
+            color: #0071c4; 
+            margin-bottom: 6px; 
+        }
+        
+        .modelo { 
+            font-size: 14px; 
+            color: #666666; 
+            letter-spacing: 1px;
+            margin-bottom: 14px; 
+        }
+        
+        .precio { 
+            font-size: 26px; 
+            color: #666666; 
+        }
+        
+        .seccion-interactiva {
+            display: flex;
+            flex-direction: column;
+            gap: 16px; 
+        }
+
+        .panel-cantidad{
+            display: flex;
+            background: transparent; 
+            padding: 15px 0;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+        }
+
+        .col-botones-canti{
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 45%; 
+        }
+
+        .btn-canti { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #adadad; 
+            background: #ffffff; 
+            font-size: 18px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            color: #666666; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.2s ease;
+        }
+        .btn-canti:hover {
+            border-color: #666666;
+            color: #0071c4;
+        }
+        
+        .col-display-canti{
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .label-canti{
+            font-size: 16px; 
+            color: #666666;
+            margin-bottom: 6px;
+        }
+
+        .input-canti { 
+            width: 100%; 
+            border: none; 
+            background: transparent; 
+            text-align: center; 
+            font-size: 26px; 
+            color: #0071c4; 
+        }
+        .input-canti:focus { outline: none; }
+        
+        .input-canti::-webkit-outer-spin-button,
+        .input-canti::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .total-container { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin: 10px 0 20px 0;
+        }
+        
+        .total-label { 
+            font-size: 16px; 
+            color: #666666; 
+        }
+        
+        .total-val { 
+            font-size: 28px; 
+            color: #0071c4; 
+        }
+        
+        .decimales {
+            font-size: 0.65em;
+            vertical-align: super;
+        }
+        
+        .btn-accion { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            width: 100%; 
+            padding: 16px; 
+            border-radius: 4px; 
+            font-size: 14px; 
+            cursor: pointer; 
+            letter-spacing: 1px; 
+            transition: all 0.2s ease;
+        }
+
+        .btn-ws { 
+            background: #ffffff; 
+            color: #666666; 
+            border: 1px solid #adadad;
+        }
+        .btn-ws:hover {
+            border-color: #666666;
+            color: #0071c4;
+        }
+        
+        .btn-cart { 
+            background: #0071c4; 
+            color: #ffffff; 
+            border: none; 
+        }
+        .btn-cart:hover {
+            background: #005fa3;
+        }
+        
+        #fecha-entrega {
+            font-size: 17px; 
+            color: #666666;
+            text-align: center;
+            line-height: 1.4; 
+            letter-spacing: .5px; 
+            padding-top: 16px;
+        }
+
+        .fecha-destacada {
+            color: #0071c4; 
+            font-size: 18px; 
+            display: inline-block;
+            margin: 4px 0;
+        }
+
+        .toast-msg {
+            display: none;
+            text-align: center;
+            color: #0071c4;
+            font-size: 14px;
+            margin-top: 8px;
+        }
+        
+        .error-msg { 
+            color: #666666; 
+            text-align: center; 
+            padding: 30px 0; 
+            font-size: 16px;
+        }
+        
+        #loading {
+            text-align: center;
+            color: #666666;
+            padding: 30px 0;
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 0 0 15px 0; } 
+            .btn-canti { padding: 10px; }
+            .btn-accion { padding: 14px; }
+            #fecha-entrega { font-size: 15px; }
+            .fecha-destacada { font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card" id="calc-container">
+    <div id="loading">Cargando producto...</div>
+</div>
+
+<script>
+    const TELEFONO_WHATSAPP = "525521133250"; 
+    let productoActual = null;
+    let cantidad = 1;
+    let precioNumerico = 0;
+    let db = null;
+
+    // Inicializar IndexedDB
+    function inicializarDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open("CatalogoDB", 1);
+            
+            request.onupgradeneeded = function(e) {
+                const database = e.target.result;
+                if (!database.objectStoreNames.contains("carrito")) {
+                    database.createObjectStore("carrito", { keyPath: "codigo" });
+                }
+            };
+            
+            request.onsuccess = function(e) { 
+                db = e.target.result;
+                resolve(db);
+            };
+
+            request.onerror = function(e) {
+                reject(e.target.error);
+            };
+        });
+    }
+
+    // Cargar producto desde JSON
+    function cargarProducto(idProducto) {
+        const container = document.getElementById('calc-container');
+        
+        fetch('productos.json')
+            .then(response => {
+                if (!response.ok) throw new Error("Error al cargar JSON");
+                return response.json();
+            })
+            .then(productosDB => {
+                // Buscar por Código (mayúscula, como en tu JSON)
+                productoActual = productosDB.find(p => String(p.Código) === String(idProducto));
+                if (productoActual) {
+                    // Extraer precio: "$11.67" -> 11.67
+                    precioNumerico = parseFloat(productoActual.Precio.replace('$', '').replace(',', ''));
+                    renderCalculadora();
+                } else {
+                    container.innerHTML = `<div class="error-msg">Código #${idProducto} no encontrado en inventario.</div>`;
+                }
+            })
+            .catch(error => {
+                container.innerHTML = `<div class="error-msg">Error de conexión o archivo productos.json ausente.</div>`;
+                console.error(error);
+            });
+    }
+
+    // Iniciar cuando carga la página
+    window.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const idProducto = urlParams.get('id');
+        const container = document.getElementById('calc-container');
+
+        if (!idProducto) {
+            container.innerHTML = `<div class="error-msg">Falta especificar el ID en la URL (?id=CODIGO)</div>`;
+            return;
+        }
+
+        inicializarDB()
+            .then(() => cargarProducto(idProducto))
+            .catch(error => {
+                container.innerHTML = `<div class="error-msg">Error de base de datos: ${error.message}</div>`;
+            });
+    });
+
+    function renderCalculadora() {
+        const container = document.getElementById('calc-container');
+        container.innerHTML = `
+            <div class="info-producto">
+                <div class="categoria">${productoActual.Categoria}</div>
+                <div class="modelo">${productoActual.Modelo}</div>
+                <div class="precio">${formatMonto(precioNumerico)} <span style="font-size:12px; color:#666666;">C/U</span></div>
+            </div>
+            
+            <div class="seccion-interactiva">
+                <div class="panel-cantidad">
+                    <div class="col-botones-canti">
+                        <button class="btn-canti" onclick="modificarCantidad(1)">+</button>
+                        <button class="btn-canti" onclick="modificarCantidad(-1)">-</button>
+                    </div>
+                    <div class="col-display-canti">
+                        <span class="label-canti">Cantidad</span>
+                        <input type="number" class="input-canti" id="cant-input" value="1" min="1" oninput="validarInput(this)">
+                    </div>
+                </div>
+
+                <div class="total-container">
+                    <span class="total-label">Total estimado:</span>
+                    <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
+                </div>
+
+                <button class="btn-accion btn-ws" onclick="enviarWhatsApp()">Pedido por WhatsApp</button>
+                <button class="btn-accion btn-cart" onclick="agregarAlCarrito()">Agregar al Carrito</button>
+                
+                <p id="fecha-entrega"></p>
+                <div class="toast-msg" id="msg-agregado">¡Agregado al carrito!</div>
+            </div>
+        `;
+        calcularProximoDiaHabil();
+    }
+
+    function formatMonto(monto) {
+        const partes = monto.toFixed(2).split('.');
+        const entero = parseFloat(partes[0]).toLocaleString('es-MX');
+        const decimales = partes[1];
+        return `${entero}<span class="decimales">.${decimales}</span>`;
+    }
+
+    function modificarCantidad(valor) {
+        const input = document.getElementById('cant-input');
+        let nuevaCantidad = (parseInt(input.value) || 1) + valor;
+        if (nuevaCantidad < 1) nuevaCantidad = 1;
+        input.value = nuevaCantidad;
+        cantidad = nuevaCantidad;
+        actualizarTotal();
+    }
+
+    function validarInput(input) {
+        let valor = parseInt(input.value);
+        if (valor < 1 || isNaN(valor)) valor = 1;
+        cantidad = valor;
+        actualizarTotal();
+    }
+
+    function actualizarTotal() {
+        const total = cantidad * precioNumerico;
+        document.getElementById('total-display').innerHTML = formatMonto(total);
+    }
+
+    function enviarWhatsApp() {
+        const totalTexto = (cantidad * precioNumerico).toFixed(2);
+        const mensaje = `Hola oswo, me interesa:\n${productoActual.Categoria} - ${productoActual.Modelo}\nCódigo: ${productoActual.Código}\nCantidad: ${cantidad} piezas\nTotal: $${totalTexto}\n¿Me confirmas disponibilidad?`;
+        const urlWs = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
+        window.open(urlWs, '_blank');
+    }
+
+    function agregarAlCarrito() {
+        if (!db) {
+            alert("BASE DE DATOS NO LISTA. Intenta de nuevo.");
+            return;
+        }
+
+        const total = parseFloat((cantidad * precioNumerico).toFixed(2));
+        
+        // Guardar con minúsculas para compatibilidad con carrito
+        const item = {
+            codigo: String(productoActual.Código),
+            categoria: productoActual.Categoria,
+            modelo: productoActual.Modelo,
+            cantidad: parseInt(cantidad),
+            precioUnitario: precioNumerico,
+            total: total
+        };
+        
+        const transaction = db.transaction(["carrito"], "readwrite");
+        const store = transaction.objectStore("carrito");
+        const requestAdd = store.put(item);
+        
+        requestAdd.onsuccess = function() {
+            const aviso = document.getElementById('msg-agregado');
+            aviso.style.display = 'block';
+            
+            setTimeout(() => {
+                aviso.style.display = 'none';
+            }, 3000);
+
+            const input = document.getElementById('cant-input');
+            input.value = 1;
+            cantidad = 1;
+            actualizarTotal();
+        };
+
+        requestAdd.onerror = function() {
+            alert("Error al agregar al carrito: " + requestAdd.error);
+        };
+    }
+
+    function calcularProximoDiaHabil() {
+        const hoy = new Date();
+        const diaSemana = hoy.getDay();
+        if (diaSemana === 5) hoy.setDate(hoy.getDate() + 1);
+        else if (diaSemana === 6) hoy.setDate(hoy.getDate() + 2);
+        else hoy.setDate(hoy.getDate() + 1);
+
+        const opciones = { weekday: 'long', month: 'long', day: 'numeric' };
+        const fechaFormateada = hoy.toLocaleDateString('es-ES', opciones);
+
+        const contenedorFecha = document.getElementById("fecha-entrega");
+        if (contenedorFecha) {
+            contenedorFecha.innerHTML =
+            "PIDA HOY Y RECIBA EL<br>" +
+            "<span class='fecha-destacada'>" + fechaFormateada.toUpperCase() + "</span>" +
+            "<br><br>ENVÍO GRATIS EN CDMX<br>PAGO CONTRA ENTREGA";
+        }
+    }
+</script>
+</body>
+</html>
