@@ -571,9 +571,6 @@
         const precio = precioEfectivo();
         const total = parseFloat((cantidad * precio).toFixed(2));
         
-        // Guardamos la URL actual del navegador para que regrese exactamente a esta calculadora
-        const urlActual = window.location.href;
-        
         const item = {
             codigo: String(productoActual.Código),
             categoria: productoActual.Categoria,
@@ -581,7 +578,7 @@
             cantidad: parseInt(cantidad),
             precioUnitario: precio,
             total: total,
-            URL: urlActual // <--- Cambiado a mayúsculas para emparejar con el JSON y el Carrito
+            URL: productoActual.URL || '#' // <--- CORRECCIÓN: Guarda el enlace del catálogo externo (Google Sites)
         };
         
         const transaction = db.transaction(["carrito"], "readwrite");
