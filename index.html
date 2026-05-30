@@ -39,7 +39,6 @@
         .info-producto { 
             margin-bottom: 30px; 
             text-align: left;
-            /* espacio para que el precio-descuento-row absoluto no quede cortado */
             min-height: 80px;
         }
         
@@ -75,12 +74,10 @@
             color: #cccccc;
         }
 
-        /* Solo el entero se tacha — los centavos no */
         .precio-entero-tachado {
             text-decoration: line-through;
         }
 
-        /* Precio nuevo + badge: flota a la derecha, solo opacity */
         .precio-descuento-row {
             position: absolute;
             right: 0;
@@ -186,7 +183,6 @@
             margin: 0;
         }
 
-        /* Aviso de descuento próximo — flota sobre el total, no empuja el layout */
         .aviso-wrapper {
             position: relative;
             height: 0;
@@ -352,7 +348,7 @@
     let umbralNumerico = 0;
     let descuentoPct = 0;
     let db = null;
-    let avisoMostrado = false; // Se muestra solo 1 vez
+    let avisoMostrado = false;
 
     function inicializarDB() {
         return new Promise((resolve, reject) => {
@@ -505,13 +501,11 @@
             ? precioNumerico * (1 - descuentoPct / 100)
             : precioNumerico;
 
-        // Actualizar total
         const total = cantidad * precioFinal;
         document.getElementById('total-display').innerHTML = formatMonto(total);
 
         if (!tieneDescuento) return;
 
-        // Precio base: solo color gris + tachar solo el entero
         const precioBase = document.getElementById('precio-base');
         const precioEntero = document.getElementById('precio-entero');
         const precioDesRow = document.getElementById('precio-descuento-row');
@@ -530,7 +524,6 @@
             precioDesRow.classList.remove('visible');
         }
 
-        // Aviso de descuento próximo: solo 1 vez cuando supera el 75%
         const avisoDesc = document.getElementById('aviso-desc');
         const avisoTexto = document.getElementById('aviso-texto');
 
@@ -540,20 +533,17 @@
             avisoDesc.classList.add('visible');
             avisoMostrado = true;
 
-            // Desaparece al tocar cualquier parte de la pantalla
             function cerrarAviso() {
                 avisoDesc.classList.remove('visible');
                 document.removeEventListener('click', cerrarAviso);
                 document.removeEventListener('touchstart', cerrarAviso);
             }
-            // Pequeño delay para que el clic que activó el aviso no lo cierre de inmediato
             setTimeout(() => {
                 document.addEventListener('click', cerrarAviso);
                 document.addEventListener('touchstart', cerrarAviso);
             }, 400);
         }
 
-        // Si ya alcanzó el umbral, ocultar el aviso si estuviera visible
         if (descuentoAplicado && avisoDesc) {
             avisoDesc.classList.remove('visible');
         }
@@ -581,13 +571,17 @@
         const precio = precioEfectivo();
         const total = parseFloat((cantidad * precio).toFixed(2));
         
+        // Guardamos la URL actual del navegador para que regrese exactamente a esta calculadora
+        const urlActual = window.location.href;
+        
         const item = {
             codigo: String(productoActual.Código),
             categoria: productoActual.Categoria,
             modelo: productoActual.Modelo,
             cantidad: parseInt(cantidad),
             precioUnitario: precio,
-            total: total
+            total: total,
+            URL: urlActual // <--- Cambiado a mayúsculas para emparejar con el JSON y el Carrito
         };
         
         const transaction = db.transaction(["carrito"], "readwrite");
