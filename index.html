@@ -56,9 +56,9 @@
 
         .precio-wrapper {
             display: flex;
-            align-items: baseline;
-            gap: 10px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
         }
 
         .precio { 
@@ -67,42 +67,40 @@
             transition: color 0.4s ease, font-size 0.4s ease;
         }
 
-        .precio.tachado {
-            text-decoration: line-through;
+        .precio.reducido {
             color: #bbbbbb;
-            font-size: 20px;
+            font-size: 16px;
+        }
+
+        /* Fila centrada: precio nuevo + badge */
+        .precio-descuento-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.35s ease 0.05s;
+        }
+
+        .precio-descuento-row.visible {
+            max-height: 60px;
+            opacity: 1;
         }
 
         .precio-nuevo {
-            font-size: 26px;
+            font-size: 30px;
             color: #0071c4;
-            opacity: 0;
-            max-width: 0;
-            overflow: hidden;
-            white-space: nowrap;
-            transition: opacity 0.4s ease 0.1s, max-width 0.4s ease;
-        }
-
-        .precio-nuevo.visible {
-            opacity: 1;
-            max-width: 220px;
         }
 
         .badge-descuento {
-            font-size: 12px;
+            font-size: 16px;
             color: #ffffff;
             background: #0071c4;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 3px;
             letter-spacing: 0.5px;
-            opacity: 0;
-            transform: translateY(4px);
-            transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s;
-        }
-
-        .badge-descuento.visible {
-            opacity: 1;
-            transform: translateY(0);
         }
         
         .seccion-interactiva {
@@ -178,30 +176,28 @@
             margin: 0;
         }
 
-        /* Aviso de descuento próximo — animación suave */
+        /* Aviso de descuento próximo — azul como botón, aparece 1 sola vez */
         .aviso-descuento {
             display: flex;
             align-items: center;
             gap: 10px;
             border-radius: 4px;
-            background: #f0f7fd;
-            border: 1px solid #d4e8f8;
+            background: #0071c4;
+            border: none;
             overflow: hidden;
             max-height: 0;
             opacity: 0;
             padding: 0 14px;
-            border-width: 0;
+            cursor: pointer;
             transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1),
                         opacity 0.35s ease,
-                        padding 0.35s ease,
-                        border-width 0.1s ease;
+                        padding 0.35s ease;
         }
 
         .aviso-descuento.visible {
             max-height: 80px;
             opacity: 1;
             padding: 11px 14px;
-            border-width: 1px;
         }
 
         .aviso-icono {
@@ -212,14 +208,14 @@
 
         .aviso-texto {
             font-size: 13px;
-            color: #0071c4;
+            color: #ffffff;
             letter-spacing: 0.3px;
             line-height: 1.35;
         }
 
         .aviso-texto strong {
             font-weight: 400;
-            color: #004f8a;
+            color: #ffffff;
         }
         
         .total-container { 
@@ -336,6 +332,7 @@
     let umbralNumerico = 0;
     let descuentoPct = 0;
     let db = null;
+    let avisoMostrado = false; // Se muestra solo 1 vez
 
     function inicializarDB() {
         return new Promise((resolve, reject) => {
@@ -403,8 +400,10 @@
                 <div class="precio-wrapper">
                     <span class="precio" id="precio-base">${formatMonto(precioNumerico)} <span style="font-size:12px; color:#666666;">C/U</span></span>
                     ${tieneDescuento ? `
-                    <span class="precio-nuevo" id="precio-nuevo"></span>
-                    <span class="badge-descuento" id="badge-desc"></span>
+                    <div class="precio-descuento-row" id="precio-descuento-row">
+                        <span class="precio-nuevo" id="precio-nuevo"></span>
+                        <span class="badge-descuento" id="badge-desc"></span>
+                    </div>
                     ` : ''}
                 </div>
             </div>
@@ -482,32 +481,47 @@
 
         if (!tieneDescuento) return;
 
-        // Precio tachado + precio nuevo + badge
+        // Precio base: solo reduce tamaño, sin tachar
         const precioBase = document.getElementById('precio-base');
+        const precioDesRow = document.getElementById('precio-descuento-row');
         const precioNuevo = document.getElementById('precio-nuevo');
         const badgeDesc = document.getElementById('badge-desc');
 
         if (descuentoAplicado) {
-            precioBase.classList.add('tachado');
-            precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span style="font-size:12px; color:#0071c4;">C/U</span>';
-            precioNuevo.classList.add('visible');
+            precioBase.classList.add('reducido');
+            precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span style="font-size:13px; color:#0071c4;">C/U</span>';
             badgeDesc.textContent = `-${descuentoPct}%`;
-            badgeDesc.classList.add('visible');
+            precioDesRow.classList.add('visible');
         } else {
-            precioBase.classList.remove('tachado');
-            precioNuevo.classList.remove('visible');
-            badgeDesc.classList.remove('visible');
+            precioBase.classList.remove('reducido');
+            precioDesRow.classList.remove('visible');
         }
 
-        // Aviso de descuento próximo (>75% del umbral pero sin alcanzarlo)
+        // Aviso de descuento próximo: solo 1 vez cuando supera el 75%
         const avisoDesc = document.getElementById('aviso-desc');
         const avisoTexto = document.getElementById('aviso-texto');
 
-        if (!descuentoAplicado && cantidad > umbral75) {
+        if (!descuentoAplicado && cantidad > umbral75 && !avisoMostrado) {
             const faltantes = umbralNumerico - cantidad;
             avisoTexto.innerHTML = `Te faltan <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
             avisoDesc.classList.add('visible');
-        } else {
+            avisoMostrado = true;
+
+            // Desaparece al tocar cualquier parte de la pantalla
+            function cerrarAviso() {
+                avisoDesc.classList.remove('visible');
+                document.removeEventListener('click', cerrarAviso);
+                document.removeEventListener('touchstart', cerrarAviso);
+            }
+            // Pequeño delay para que el clic que activó el aviso no lo cierre de inmediato
+            setTimeout(() => {
+                document.addEventListener('click', cerrarAviso);
+                document.addEventListener('touchstart', cerrarAviso);
+            }, 400);
+        }
+
+        // Si ya alcanzó el umbral, ocultar el aviso si estuviera visible
+        if (descuentoAplicado && avisoDesc) {
             avisoDesc.classList.remove('visible');
         }
     }
