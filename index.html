@@ -53,10 +53,56 @@
             letter-spacing: 1px;
             margin-bottom: 14px; 
         }
-        
+
+        .precio-wrapper {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .precio { 
             font-size: 26px; 
-            color: #666666; 
+            color: #666666;
+            transition: color 0.4s ease, font-size 0.4s ease;
+        }
+
+        .precio.tachado {
+            text-decoration: line-through;
+            color: #bbbbbb;
+            font-size: 20px;
+        }
+
+        .precio-nuevo {
+            font-size: 26px;
+            color: #0071c4;
+            opacity: 0;
+            max-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            transition: opacity 0.4s ease 0.1s, max-width 0.4s ease;
+        }
+
+        .precio-nuevo.visible {
+            opacity: 1;
+            max-width: 220px;
+        }
+
+        .badge-descuento {
+            font-size: 12px;
+            color: #ffffff;
+            background: #0071c4;
+            padding: 3px 8px;
+            border-radius: 3px;
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transform: translateY(4px);
+            transition: opacity 0.4s ease 0.2s, transform 0.4s ease 0.2s;
+        }
+
+        .badge-descuento.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
         
         .seccion-interactiva {
@@ -130,6 +176,50 @@
         .input-canti::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
+        }
+
+        /* Aviso de descuento próximo — animación suave */
+        .aviso-descuento {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 4px;
+            background: #f0f7fd;
+            border: 1px solid #d4e8f8;
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            padding: 0 14px;
+            border-width: 0;
+            transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1),
+                        opacity 0.35s ease,
+                        padding 0.35s ease,
+                        border-width 0.1s ease;
+        }
+
+        .aviso-descuento.visible {
+            max-height: 80px;
+            opacity: 1;
+            padding: 11px 14px;
+            border-width: 1px;
+        }
+
+        .aviso-icono {
+            font-size: 18px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .aviso-texto {
+            font-size: 13px;
+            color: #0071c4;
+            letter-spacing: 0.3px;
+            line-height: 1.35;
+        }
+
+        .aviso-texto strong {
+            font-weight: 400;
+            color: #004f8a;
         }
         
         .total-container { 
@@ -243,46 +333,37 @@
     let productoActual = null;
     let cantidad = 1;
     let precioNumerico = 0;
+    let umbralNumerico = 0;
+    let descuentoPct = 0;
     let db = null;
 
-    // Inicializar IndexedDB
     function inicializarDB() {
         return new Promise((resolve, reject) => {
             const request = indexedDB.open("CatalogoDB", 1);
-            
             request.onupgradeneeded = function(e) {
                 const database = e.target.result;
                 if (!database.objectStoreNames.contains("carrito")) {
                     database.createObjectStore("carrito", { keyPath: "codigo" });
                 }
             };
-            
-            request.onsuccess = function(e) { 
-                db = e.target.result;
-                resolve(db);
-            };
-
-            request.onerror = function(e) {
-                reject(e.target.error);
-            };
+            request.onsuccess = function(e) { db = e.target.result; resolve(db); };
+            request.onerror = function(e) { reject(e.target.error); };
         });
     }
 
-    // Cargar producto desde JSON
     function cargarProducto(idProducto) {
         const container = document.getElementById('calc-container');
-        
         fetch('productos.json')
             .then(response => {
                 if (!response.ok) throw new Error("Error al cargar JSON");
                 return response.json();
             })
             .then(productosDB => {
-                // Buscar por Código (mayúscula, como en tu JSON)
                 productoActual = productosDB.find(p => String(p.Código) === String(idProducto));
                 if (productoActual) {
-                    // Extraer precio: "$11.67" -> 11.67
                     precioNumerico = parseFloat(productoActual.Precio.replace('$', '').replace(',', ''));
+                    umbralNumerico = parseInt(productoActual.Umbral) || 0;
+                    descuentoPct = parseFloat(productoActual.Descuento) || 0;
                     renderCalculadora();
                 } else {
                     container.innerHTML = `<div class="error-msg">Código #${idProducto} no encontrado en inventario.</div>`;
@@ -294,7 +375,6 @@
             });
     }
 
-    // Iniciar cuando carga la página
     window.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const idProducto = urlParams.get('id');
@@ -314,11 +394,19 @@
 
     function renderCalculadora() {
         const container = document.getElementById('calc-container');
+        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
+
         container.innerHTML = `
             <div class="info-producto">
                 <div class="categoria">${productoActual.Categoria}</div>
                 <div class="modelo">${productoActual.Modelo}</div>
-                <div class="precio">${formatMonto(precioNumerico)} <span style="font-size:12px; color:#666666;">C/U</span></div>
+                <div class="precio-wrapper">
+                    <span class="precio" id="precio-base">${formatMonto(precioNumerico)} <span style="font-size:12px; color:#666666;">C/U</span></span>
+                    ${tieneDescuento ? `
+                    <span class="precio-nuevo" id="precio-nuevo"></span>
+                    <span class="badge-descuento" id="badge-desc"></span>
+                    ` : ''}
+                </div>
             </div>
             
             <div class="seccion-interactiva">
@@ -333,6 +421,11 @@
                     </div>
                 </div>
 
+                ${tieneDescuento ? `<div class="aviso-descuento" id="aviso-desc">
+                    <span class="aviso-icono">🏷️</span>
+                    <span class="aviso-texto" id="aviso-texto"></span>
+                </div>` : ''}
+
                 <div class="total-container">
                     <span class="total-label">Total estimado:</span>
                     <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
@@ -345,6 +438,8 @@
                 <div class="toast-msg" id="msg-agregado">¡Agregado al carrito!</div>
             </div>
         `;
+
+        actualizarUI();
         calcularProximoDiaHabil();
     }
 
@@ -361,24 +456,71 @@
         if (nuevaCantidad < 1) nuevaCantidad = 1;
         input.value = nuevaCantidad;
         cantidad = nuevaCantidad;
-        actualizarTotal();
+        actualizarUI();
     }
 
     function validarInput(input) {
         let valor = parseInt(input.value);
         if (valor < 1 || isNaN(valor)) valor = 1;
         cantidad = valor;
-        actualizarTotal();
+        actualizarUI();
     }
 
-    function actualizarTotal() {
-        const total = cantidad * precioNumerico;
+    function actualizarUI() {
+        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
+        const unidad = productoActual.Unidad || 'PIEZAS';
+        const umbral75 = umbralNumerico * 0.75;
+        const descuentoAplicado = tieneDescuento && cantidad >= umbralNumerico;
+
+        const precioFinal = descuentoAplicado
+            ? precioNumerico * (1 - descuentoPct / 100)
+            : precioNumerico;
+
+        // Actualizar total
+        const total = cantidad * precioFinal;
         document.getElementById('total-display').innerHTML = formatMonto(total);
+
+        if (!tieneDescuento) return;
+
+        // Precio tachado + precio nuevo + badge
+        const precioBase = document.getElementById('precio-base');
+        const precioNuevo = document.getElementById('precio-nuevo');
+        const badgeDesc = document.getElementById('badge-desc');
+
+        if (descuentoAplicado) {
+            precioBase.classList.add('tachado');
+            precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span style="font-size:12px; color:#0071c4;">C/U</span>';
+            precioNuevo.classList.add('visible');
+            badgeDesc.textContent = `-${descuentoPct}%`;
+            badgeDesc.classList.add('visible');
+        } else {
+            precioBase.classList.remove('tachado');
+            precioNuevo.classList.remove('visible');
+            badgeDesc.classList.remove('visible');
+        }
+
+        // Aviso de descuento próximo (>75% del umbral pero sin alcanzarlo)
+        const avisoDesc = document.getElementById('aviso-desc');
+        const avisoTexto = document.getElementById('aviso-texto');
+
+        if (!descuentoAplicado && cantidad > umbral75) {
+            const faltantes = umbralNumerico - cantidad;
+            avisoTexto.innerHTML = `Te faltan <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
+            avisoDesc.classList.add('visible');
+        } else {
+            avisoDesc.classList.remove('visible');
+        }
+    }
+
+    function precioEfectivo() {
+        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
+        const descuentoAplicado = tieneDescuento && cantidad >= umbralNumerico;
+        return descuentoAplicado ? precioNumerico * (1 - descuentoPct / 100) : precioNumerico;
     }
 
     function enviarWhatsApp() {
-        const totalTexto = (cantidad * precioNumerico).toFixed(2);
-        const mensaje = `Hola oswo, me interesa:\n${productoActual.Categoria} - ${productoActual.Modelo}\nCódigo: ${productoActual.Código}\nCantidad: ${cantidad} piezas\nTotal: $${totalTexto}\n¿Me confirmas disponibilidad?`;
+        const totalTexto = (cantidad * precioEfectivo()).toFixed(2);
+        const mensaje = `Hola oswo, me interesa:\n${productoActual.Categoria} - ${productoActual.Modelo}\nCódigo: ${productoActual.Código}\nCantidad: ${cantidad} ${productoActual.Unidad || 'piezas'}\nTotal: $${totalTexto}\n¿Me confirmas disponibilidad?`;
         const urlWs = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
         window.open(urlWs, '_blank');
     }
@@ -389,15 +531,15 @@
             return;
         }
 
-        const total = parseFloat((cantidad * precioNumerico).toFixed(2));
+        const precio = precioEfectivo();
+        const total = parseFloat((cantidad * precio).toFixed(2));
         
-        // Guardar con minúsculas para compatibilidad con carrito
         const item = {
             codigo: String(productoActual.Código),
             categoria: productoActual.Categoria,
             modelo: productoActual.Modelo,
             cantidad: parseInt(cantidad),
-            precioUnitario: precioNumerico,
+            precioUnitario: precio,
             total: total
         };
         
@@ -408,15 +550,11 @@
         requestAdd.onsuccess = function() {
             const aviso = document.getElementById('msg-agregado');
             aviso.style.display = 'block';
-            
-            setTimeout(() => {
-                aviso.style.display = 'none';
-            }, 3000);
-
+            setTimeout(() => { aviso.style.display = 'none'; }, 3000);
             const input = document.getElementById('cant-input');
             input.value = 1;
             cantidad = 1;
-            actualizarTotal();
+            actualizarUI();
         };
 
         requestAdd.onerror = function() {
