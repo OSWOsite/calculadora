@@ -62,20 +62,25 @@
             flex-direction: column;
             align-items: flex-start;
             width: 100%;
+            overflow: hidden;
         }
 
         .precio { 
             font-size: 26px; 
             color: #666666;
-            transition: color 0.4s ease, font-size 0.4s ease;
+            transition: color 0.4s ease;
         }
 
         .precio.reducido {
-            color: #bbbbbb;
-            font-size: 16px;
+            color: #cccccc;
         }
 
-        /* Precio nuevo + badge: flota a la derecha, no tapa el precio anterior */
+        /* Solo el entero se tacha — los centavos no */
+        .precio-entero-tachado {
+            text-decoration: line-through;
+        }
+
+        /* Precio nuevo + badge: flota a la derecha, solo opacity */
         .precio-descuento-row {
             position: absolute;
             right: 0;
@@ -85,13 +90,11 @@
             gap: 10px;
             pointer-events: none;
             opacity: 0;
-            transform: translateX(8px);
-            transition: opacity 0.35s ease, transform 0.35s ease;
+            transition: opacity 0.35s ease;
         }
 
         .precio-descuento-row.visible {
             opacity: 1;
-            transform: translateX(0);
         }
 
         .precio-nuevo {
@@ -415,7 +418,7 @@
                 <div class="categoria">${productoActual.Categoria}</div>
                 <div class="modelo">${productoActual.Modelo}</div>
                 <div class="precio-wrapper">
-                    <span class="precio" id="precio-base">${formatMonto(precioNumerico)} <span style="font-size:12px; color:#666666;">C/U</span></span>
+                    <span class="precio" id="precio-base"><span id="precio-entero">${formatEntero(precioNumerico)}</span><span class="decimales" id="precio-cents">.${formatCents(precioNumerico)}</span> <span style="font-size:12px; color:#666666;">C/U</span></span>
                     ${tieneDescuento ? `
                     <div class="precio-descuento-row" id="precio-descuento-row">
                         <span class="precio-nuevo" id="precio-nuevo"></span>
@@ -468,6 +471,14 @@
         return `${entero}<span class="decimales">.${decimales}</span>`;
     }
 
+    function formatEntero(monto) {
+        return parseFloat(monto.toFixed(2).split('.')[0]).toLocaleString('es-MX');
+    }
+
+    function formatCents(monto) {
+        return monto.toFixed(2).split('.')[1];
+    }
+
     function modificarCantidad(valor) {
         const input = document.getElementById('cant-input');
         let nuevaCantidad = (parseInt(input.value) || 1) + valor;
@@ -500,19 +511,22 @@
 
         if (!tieneDescuento) return;
 
-        // Precio base: solo reduce tamaño, sin tachar
+        // Precio base: solo color gris + tachar solo el entero
         const precioBase = document.getElementById('precio-base');
+        const precioEntero = document.getElementById('precio-entero');
         const precioDesRow = document.getElementById('precio-descuento-row');
         const precioNuevo = document.getElementById('precio-nuevo');
         const badgeDesc = document.getElementById('badge-desc');
 
         if (descuentoAplicado) {
             precioBase.classList.add('reducido');
+            precioEntero.classList.add('precio-entero-tachado');
             precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span style="font-size:13px; color:#0071c4;">C/U</span>';
             badgeDesc.textContent = `-${descuentoPct}%`;
             precioDesRow.classList.add('visible');
         } else {
             precioBase.classList.remove('reducido');
+            precioEntero.classList.remove('precio-entero-tachado');
             precioDesRow.classList.remove('visible');
         }
 
