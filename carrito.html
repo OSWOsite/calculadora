@@ -101,6 +101,15 @@
             color: #e74c3c;
             text-decoration: underline; 
         }
+
+        .btn-editar-item {
+            color: #0071c4;
+            margin-left: 10px;
+        }
+        .btn-editar-item:hover {
+            color: #005fa3;
+            text-decoration: underline;
+        }
         
         .total-compra { 
             display: flex;
@@ -239,6 +248,7 @@ function renderizarCarrito() {
         const codigo = item.codigo || '';
         const categoria = item.categoria || 'Sin categoría';
         const modelo = item.modelo || 'Sin modelo';
+        const url = item.url || '#';
         const cantidad = item.cantidad || 1;
         const precioUnitario = item.precioUnitario || 0;
         const total = item.total || 0;
@@ -247,12 +257,15 @@ function renderizarCarrito() {
             <div class="item-carrito">
                 <div class="item-detalles">
                     <div class="item-categoria">${categoria}</div>
-                    <div class="item-modelo">${modelo}</div>
+                    <div class="item-modelo">CÓDIGO: ${codigo} - ${modelo}</div>
                 </div>
                 <div class="item-derecha">
                     <div class="item-total">${formatMonto(total)}</div>
                     <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
-                    <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
+                    <div>
+                        <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
+                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -284,12 +297,13 @@ function enviarPedidoWhatsApp() {
     let sumaTotal = 0;
 
     productosEnCarrito.forEach((item, index) => {
+        const codigo = item.codigo || '';
         const categoria = item.categoria || '';
         const modelo = item.modelo || '';
         const cantidad = item.cantidad || 1;
         const total = item.total || 0;
         
-        mensaje += `${index + 1}. [${cantidad} pz] - ${categoria} (${modelo}) -> $${total.toFixed(2)}\n`;
+        mensaje += `${index + 1}. [${cantidad} pz] - Código ${codigo} - ${categoria} (${modelo}) -> $${total.toFixed(2)}\n`;
         sumaTotal += total;
     });
 
