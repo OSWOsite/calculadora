@@ -61,6 +61,7 @@
             display: flex;
             flex-direction: column;
             align-items: flex-start;
+            width: 100%;
         }
 
         .precio { 
@@ -74,17 +75,17 @@
             font-size: 16px;
         }
 
-        /* Precio nuevo + badge: flota desde la izquierda donde estaba el precio base */
+        /* Precio nuevo + badge: flota a la derecha, no tapa el precio anterior */
         .precio-descuento-row {
             position: absolute;
-            left: 0;
+            right: 0;
             top: 0;
             display: flex;
             align-items: center;
             gap: 10px;
             pointer-events: none;
             opacity: 0;
-            transform: translateX(-10px);
+            transform: translateX(8px);
             transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
