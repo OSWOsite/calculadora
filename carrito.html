@@ -104,7 +104,7 @@
 
         .btn-editar-item {
             color: #0071c4;
-            margin-left: 10px;
+            margin-left: 12px;
         }
         .btn-editar-item:hover {
             color: #005fa3;
@@ -262,7 +262,7 @@ function renderizarCarrito() {
                 <div class="item-derecha">
                     <div class="item-total">${formatMonto(total)}</div>
                     <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
-                    <div>
+                    <div style="margin-top: 6px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
                         <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
                     </div>
