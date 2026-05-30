@@ -38,7 +38,9 @@
         
         .info-producto { 
             margin-bottom: 30px; 
-            text-align: left; 
+            text-align: left;
+            /* espacio para que el precio-descuento-row absoluto no quede cortado */
+            min-height: 80px;
         }
         
         .categoria { 
@@ -55,10 +57,10 @@
         }
 
         .precio-wrapper {
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            gap: 6px;
         }
 
         .precio { 
@@ -72,26 +74,29 @@
             font-size: 16px;
         }
 
-        /* Fila centrada: precio nuevo + badge */
+        /* Precio nuevo + badge: flota desde la izquierda donde estaba el precio base */
         .precio-descuento-row {
+            position: absolute;
+            left: 0;
+            top: 0;
             display: flex;
             align-items: center;
             gap: 10px;
-            width: 100%;
-            max-height: 0;
-            overflow: hidden;
+            pointer-events: none;
             opacity: 0;
-            transition: max-height 0.4s ease, opacity 0.35s ease 0.05s;
+            transform: translateX(-10px);
+            transition: opacity 0.35s ease, transform 0.35s ease;
         }
 
         .precio-descuento-row.visible {
-            max-height: 60px;
             opacity: 1;
+            transform: translateX(0);
         }
 
         .precio-nuevo {
             font-size: 30px;
             color: #0071c4;
+            white-space: nowrap;
         }
 
         .badge-descuento {
@@ -101,6 +106,7 @@
             padding: 4px 10px;
             border-radius: 3px;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
         
         .seccion-interactiva {
@@ -176,28 +182,36 @@
             margin: 0;
         }
 
-        /* Aviso de descuento próximo — azul como botón, aparece 1 sola vez */
+        /* Aviso de descuento próximo — flota sobre el total, no empuja el layout */
+        .aviso-wrapper {
+            position: relative;
+            height: 0;
+            overflow: visible;
+        }
+
         .aviso-descuento {
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
             display: flex;
             align-items: center;
             gap: 10px;
             border-radius: 4px;
             background: #0071c4;
-            border: none;
-            overflow: hidden;
-            max-height: 0;
-            opacity: 0;
-            padding: 0 14px;
+            padding: 11px 14px;
             cursor: pointer;
-            transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1),
-                        opacity 0.35s ease,
-                        padding 0.35s ease;
+            opacity: 0;
+            transform: translateY(-6px);
+            pointer-events: none;
+            transition: opacity 0.38s ease, transform 0.38s ease;
+            z-index: 10;
         }
 
         .aviso-descuento.visible {
-            max-height: 80px;
             opacity: 1;
-            padding: 11px 14px;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
         .aviso-icono {
@@ -219,6 +233,8 @@
         }
         
         .total-container { 
+            position: relative;
+            overflow: visible;
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
@@ -420,12 +436,14 @@
                     </div>
                 </div>
 
-                ${tieneDescuento ? `<div class="aviso-descuento" id="aviso-desc">
-                    <span class="aviso-icono">🏷️</span>
-                    <span class="aviso-texto" id="aviso-texto"></span>
+                ${tieneDescuento ? `<div class="aviso-wrapper">
+                    <div class="aviso-descuento" id="aviso-desc">
+                        <span class="aviso-icono">🏷️</span>
+                        <span class="aviso-texto" id="aviso-texto"></span>
+                    </div>
                 </div>` : ''}
 
-                <div class="total-container">
+                <div class="total-container" style="${tieneDescuento ? 'margin-top: 10px;' : ''}">
                     <span class="total-label">Total estimado:</span>
                     <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
                 </div>
