@@ -248,7 +248,7 @@ function renderizarCarrito() {
         const categoria = item.categoria || 'Sin categoría';
         const modelo = item.modelo || 'Sin modelo';
         
-        // CORRECCIÓN: Intenta leer 'URL' (mayúsculas) o usa 'url' (minúsculas) por compatibilidad
+        // Lee la propiedad URL (del JSON) que guardamos en la base de datos
         const url = item.URL || item.url || '#';           
         
         const cantidad = item.cantidad || 1;
@@ -266,7 +266,7 @@ function renderizarCarrito() {
                     <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
                     <div style="margin-top: 6px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
-                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_self')">Editar</button>
+                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
                     </div>
                 </div>
             </div>
@@ -315,7 +315,7 @@ function enviarPedidoWhatsApp() {
     window.open(urlWs, '_blank');
 }
 
-// Recargar cada 2 segundos para detectar cambios
+// Recargar cada 2 segundos para detectar cambios automáticamente
 setInterval(cargarCarrito, 2000);
 </script>
 </body>
