@@ -192,7 +192,6 @@ const dbName = "CatalogoDB";
 let db = null;
 let productosEnCarrito = [];
 
-// Abrir IndexedDB
 const request = indexedDB.open(dbName, 1);
 
 request.onerror = function() {
@@ -248,7 +247,10 @@ function renderizarCarrito() {
         const codigo = item.codigo || '';
         const categoria = item.categoria || 'Sin categoría';
         const modelo = item.modelo || 'Sin modelo';
-        const url = item.url || '#';           // ← Aquí está la clave
+        
+        // CORRECCIÓN: Intenta leer 'URL' (mayúsculas) o usa 'url' (minúsculas) por compatibilidad
+        const url = item.URL || item.url || '#';           
+        
         const cantidad = item.cantidad || 1;
         const precioUnitario = item.precioUnitario || 0;
         const total = item.total || 0;
@@ -264,7 +266,7 @@ function renderizarCarrito() {
                     <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
                     <div style="margin-top: 6px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
-                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
+                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_self')">Editar</button>
                     </div>
                 </div>
             </div>
