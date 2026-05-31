@@ -17,14 +17,13 @@
         }
         
         body { 
-            background-color: transparent; /* Permite que se adapte al fondo de Google Sites */
+            background-color: transparent; 
             display: flex; 
             justify-content: center; 
             align-items: center; 
             padding: 5px;
         }
 
-        /* CONTENEDOR DEL BOTÓN COMPACTO */
         .contenedor-carrito-bloque {
             position: relative;
             display: inline-flex;
@@ -35,7 +34,6 @@
             padding: 5px 0;
         }
 
-        /* BOTÓN CIRCULAR INDEPENDIENTE */
         .btn-carrito-estatico {
             position: relative;
             width: 55px;
@@ -67,7 +65,6 @@
             fill: #0071c4;
         }
 
-        /* INDICADOR AZUL DE ARTÍCULOS */
         .indicador-pildora {
             position: absolute;
             top: 0;
@@ -77,17 +74,15 @@
             background-color: #0071c4;
             border: 2px solid #ffffff;
             border-radius: 50%;
-            display: none; /* Oculto por defecto */
+            display: none; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Estado activo cuando hay productos */
         .indicador-pildora.activo {
             display: block;
             animation: pulsoEfecto 1.5s infinite ease-in-out;
         }
 
-        /* Animación discreta para llamar la atención del cliente si hay artículos */
         @keyframes pulsoEfecto {
             0% { transform: scale(1); }
             50% { transform: scale(1.15); }
@@ -98,7 +93,8 @@
 <body>
 
 <div class="contenedor-carrito-bloque">
-    <a href="https://sites.google.com/view/oswocatlogo/carrito" target="_self" class="btn-carrito-estatico" title="Ver mi carrito">
+    <!-- CORRECCIÓN: CAMBIADO A target="_blank" PARA EVITAR EL RECHAZO DE CONEXIÓN DE GOOGLE SITES -->
+    <a href="https://sites.google.com/view/oswocatlogo/carrito" target="_blank" class="btn-carrito-estatico" title="Ver mi carrito">
         <svg viewBox="0 0 24 24">
             <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
         </svg>
@@ -110,7 +106,6 @@
     const dbName = "CatalogoDB";
     let db = null;
 
-    // Conectar a la base de datos compartida de tu navegador
     function conectarBaseDatos() {
         const request = indexedDB.open(dbName, 1);
         
@@ -124,7 +119,6 @@
         };
     }
 
-    // Comprobar si existen productos en el carrito
     function verificarCarrito() {
         if (!db) return;
         try {
@@ -136,22 +130,18 @@
                 const puntoAzul = document.getElementById('indicador-visual');
                 if (puntoAzul) {
                     if (requestGetAll.result && requestGetAll.result.length > 0) {
-                        puntoAzul.classList.add('activo'); // Activa el punto si hay elementos
+                        puntoAzul.classList.add('activo');
                     } else {
-                        puntoAzul.classList.remove('activo'); // Permanece estático si está vacío
+                        puntoAzul.classList.remove('activo');
                     }
                 }
             };
         } catch (e) {
-            // Manejo por si la transacción se interrumpe temporalmente
             console.log("Esperando inicialización completa de DB...");
         }
     }
 
-    // Iniciar conexión al cargar la página
     window.addEventListener('DOMContentLoaded', conectarBaseDatos);
-
-    // Revisar de forma automática cada 2 segundos por si agregan productos en la calculadora
     setInterval(verificarCarrito, 2000);
 </script>
 </body>
