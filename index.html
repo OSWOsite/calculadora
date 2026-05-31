@@ -529,7 +529,7 @@
 
         if (!descuentoAplicado && cantidad > umbral75 && !avisoMostrado) {
             const faltantes = umbralNumerico - cantidad;
-            avisoTexto.innerHTML = `Te faltan <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
+            avisoTexto.innerHTML = `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
             avisoDesc.classList.add('visible');
             avisoMostrado = true;
 
