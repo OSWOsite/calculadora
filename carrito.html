@@ -44,42 +44,50 @@
             border-bottom: 1px solid #eee;
         }
         
+        /* DISEÑO DE LA LISTA: TODO ALINEADO A LA IZQUIERDA */
         .item-carrito { 
             display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            flex-direction: column; /* Apila los elementos verticalmente hacia la izquierda */
+            justify-content: flex-start; 
+            align-items: flex-start; 
             padding: 15px 0; 
             border-bottom: 1px solid #eee; 
             gap: 10px; 
+            width: 100%;
         }
         
         .item-detalles { 
-            flex-grow: 1; 
+            width: 100%;
+            text-align: left;
         }
         
+        /* FUENTES AUMENTADAS (2px menos que el botón de WhatsApp que tiene 14px -> Quedan en 12px) */
         .item-categoria { 
-            font-size: 16px; 
+            font-size: 12px; 
             color: #0071c4; 
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         
         .item-modelo { 
-            font-size: 13px; 
+            font-size: 12px; 
             color: #666666; 
             letter-spacing: 0.5px;
         }
         
+        /* ALINEADO COMPLETAMENTE A LA IZQUIERDA */
         .item-derecha { 
-            text-align: right; 
+            text-align: left; 
             display: flex; 
             flex-direction: column; 
-            align-items: flex-end; 
-            gap: 4px; 
+            align-items: flex-start; 
+            gap: 6px; 
+            width: 100%;
         }
         
         .item-total { 
-            font-size: 18px; 
+            font-size: 12px; 
             color: #0071c4; 
+            font-weight: 400;
         }
         
         .item-meta { 
@@ -92,30 +100,30 @@
             border: none; 
             color: #adadad; 
             cursor: pointer; 
-            font-size: 11px; 
+            font-size: 12px; /* Uniformado a 12px */
             letter-spacing: 0.5px;
             margin-top: 2px;
             transition: color 0.2s ease;
+            text-decoration: underline;
         }
         .btn-eliminar-item:hover { 
             color: #e74c3c;
-            text-decoration: underline; 
         }
 
         .btn-editar-item {
             color: #0071c4;
-            margin-left: 12px;
+            margin-left: 14px;
+            text-decoration: underline;
         }
         .btn-editar-item:hover {
             color: #005fa3;
-            text-decoration: underline;
         }
         
         .total-compra { 
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 16px; 
+            font-size: 14px; 
             margin: 20px 0; 
             color: #666666; 
             padding-top: 15px; 
@@ -132,6 +140,7 @@
             vertical-align: super;
         }
         
+        /* BOTÓN MANDAR PEDIDO POR WHATSAPP (Mantiene fuente de 14px) */
         .btn-accion { 
             display: flex; 
             align-items: center; 
@@ -159,7 +168,7 @@
             text-align: center;
             color: #666666;
             padding: 20px 0;
-            font-size: 14px;
+            font-size: 12px;
         }
 
         .texto-auxilio {
@@ -175,8 +184,6 @@
         @media (max-width: 600px) {
             .container { padding: 0 10px; } 
             .btn-accion { padding: 14px; }
-            .item-categoria { font-size: 15px; }
-            .item-total { font-size: 16px; }
         }
     </style>
 </head>
@@ -185,7 +192,7 @@
 <div class="container">
     <h2>Tu lista de pedido</h2>
     
-    <div id="lista-carrito" style="text-align: center; color: #666666; padding: 20px 0; font-size: 14px;">
+    <div id="lista-carrito" style="text-align: center; color: #666666; padding: 20px 0; font-size: 12px;">
         Cargando productos del carrito...
         <br>
         <span class="texto-auxilio" onclick="reiniciarBaseDatosForzado()">
@@ -285,11 +292,11 @@ function renderizarCarrito() {
                     <div class="item-modelo">CÓDIGO: ${codigo} - ${modelo}</div>
                 </div>
                 <div class="item-derecha">
-                    <div class="item-total">${formatMonto(total)}</div>
+                    <div class="item-total">TOTAL: ${formatMonto(total)}</div>
                     <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
-                    <div style="margin-top: 6px;">
+                    <div style="margin-top: 4px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
-                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_self')">Editar</button>
+                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
                     </div>
                 </div>
             </div>
@@ -338,7 +345,6 @@ function enviarPedidoWhatsApp() {
     window.open(urlWs, '_blank');
 }
 
-// FUNCIÓN DE AUXILIO EN CASO DE ALMACENAMIENTO MÓVIL CONGELADO o TRABADO
 function reiniciarBaseDatosForzado() {
     if (confirm("¿DESEAS REINICIAR EL CARRITO PARA SOLUCIONAR PROBLEMAS DE CARGA? SE LIMPIARÁ TU LISTA.")) {
         if (db) db.close();
@@ -356,7 +362,6 @@ function reiniciarBaseDatosForzado() {
     }
 }
 
-// Recargar cada 2 segundos para actualizar datos en tiempo real
 setInterval(cargarCarrito, 2000);
 </script>
 </body>
