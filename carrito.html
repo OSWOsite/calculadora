@@ -162,6 +162,16 @@
             font-size: 14px;
         }
 
+        .texto-auxilio {
+            display: inline-block;
+            margin-top: 15px;
+            font-size: 11px; 
+            color: #adadad; 
+            cursor: pointer; 
+            text-decoration: underline;
+            text-transform: uppercase;
+        }
+
         @media (max-width: 600px) {
             .container { padding: 0 10px; } 
             .btn-accion { padding: 14px; }
@@ -174,7 +184,14 @@
 
 <div class="container">
     <h2>Tu lista de pedido</h2>
-    <div id="lista-carrito">Cargando productos del carrito...</div>
+    
+    <div id="lista-carrito" style="text-align: center; color: #666666; padding: 20px 0; font-size: 14px;">
+        Cargando productos del carrito...
+        <br>
+        <span class="texto-auxilio" onclick="reiniciarBaseDatosForzado()">
+            ¿Tarda demasiado? Toca aquí para solucionar
+        </span>
+    </div>
     
     <div class="total-compra" id="contenedor-total" style="display:none;">
         <span>Total de la lista:</span>
@@ -195,7 +212,10 @@ let productosEnCarrito = [];
 const request = indexedDB.open(dbName, 1);
 
 request.onerror = function() {
-    document.getElementById('lista-carrito').innerHTML = "<p class='texto-vacio'>Error al conectar con la base de datos.</p>";
+    document.getElementById('lista-carrito').innerHTML = `
+        <p class='texto-vacio'>Error al conectar con el almacenamiento.</p>
+        <span class="texto-auxilio" onclick="reiniciarBaseDatosForzado()">Toca aquí para restablecer</span>
+    `;
 };
 
 request.onsuccess = function(e) {
@@ -213,18 +233,22 @@ function formatMonto(monto) {
 function cargarCarrito() {
     if (!db) return;
 
-    const transaction = db.transaction(["carrito"], "readonly");
-    const store = transaction.objectStore("carrito");
-    const requestGetAll = store.getAll();
+    try {
+        const transaction = db.transaction(["carrito"], "readonly");
+        const store = transaction.objectStore("carrito");
+        const requestGetAll = store.getAll();
 
-    requestGetAll.onsuccess = function(e) {
-        productosEnCarrito = requestGetAll.result || [];
-        renderizarCarrito();
-    };
+        requestGetAll.onsuccess = function(e) {
+            productosEnCarrito = requestGetAll.result || [];
+            renderizarCarrito();
+        };
 
-    requestGetAll.onerror = function() {
-        document.getElementById('lista-carrito').innerHTML = "<p class='texto-vacio'>Error al cargar productos.</p>";
-    };
+        requestGetAll.onerror = function() {
+            document.getElementById('lista-carrito').innerHTML = "<p class='texto-vacio'>Error al cargar productos.</p>";
+        };
+    } catch(err) {
+        console.log("Error en transaccion de lectura, reintentando...");
+    }
 }
 
 function renderizarCarrito() {
@@ -248,7 +272,6 @@ function renderizarCarrito() {
         const categoria = item.categoria || 'Sin categoría';
         const modelo = item.modelo || 'Sin modelo';
         
-        // Lee la propiedad URL (del JSON) que guardamos en la base de datos
         const url = item.URL || item.url || '#';           
         
         const cantidad = item.cantidad || 1;
@@ -266,7 +289,7 @@ function renderizarCarrito() {
                     <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
                     <div style="margin-top: 6px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
-                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
+                        <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_self')">Editar</button>
                     </div>
                 </div>
             </div>
@@ -315,7 +338,25 @@ function enviarPedidoWhatsApp() {
     window.open(urlWs, '_blank');
 }
 
-// Recargar cada 2 segundos para detectar cambios automáticamente
+// FUNCIÓN DE AUXILIO EN CASO DE ALMACENAMIENTO MÓVIL CONGELADO o TRABADO
+function reiniciarBaseDatosForzado() {
+    if (confirm("¿DESEAS REINICIAR EL CARRITO PARA SOLUCIONAR PROBLEMAS DE CARGA? SE LIMPIARÁ TU LISTA.")) {
+        if (db) db.close();
+        
+        const reqDelete = indexedDB.deleteDatabase(dbName);
+        
+        reqDelete.onsuccess = function() {
+            alert("CARRITO RESTABLECIDO CON ÉXITO.");
+            window.location.reload();
+        };
+        
+        reqDelete.onerror = function() {
+            alert("NO SE PUDO LIMPIAR AUTOMÁTICAMENTE. POR FAVOR, LIMPIA EL HISTORIAL DE TU NAVEGADOR.");
+        };
+    }
+}
+
+// Recargar cada 2 segundos para actualizar datos en tiempo real
 setInterval(cargarCarrito, 2000);
 </script>
 </body>
