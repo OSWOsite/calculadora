@@ -34,6 +34,7 @@
             width: 100%; 
             box-shadow: none; 
             border: none; 
+            position: relative; /* Necesario para posicionar el contenedor de globos */
         }
         
         h2 { 
@@ -181,6 +182,35 @@
             text-transform: uppercase;
         }
 
+        /* CONTENEDOR Y ESTILOS PARA LOS GLOBOS DE NOTIFICACIÓN */
+        .contenedor-globos {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 90%;
+            max-width: 360px;
+            pointer-events: none;
+        }
+
+        .globo-notificacion {
+            background-color: #333333;
+            color: #ffffff;
+            padding: 12px 16px;
+            font-size: 12px;
+            text-align: center;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            letter-spacing: 0.5px;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: auto;
+        }
+
         @media (max-width: 600px) {
             .container { padding: 0 10px; } 
             .btn-accion { padding: 14px; }
@@ -210,6 +240,8 @@
     </button>
 </div>
 
+<div id="contenedor-globos" class="contenedor-globos"></div>
+
 <script>
 const TELEFONO_WHATSAPP = "525521133250"; 
 const dbName = "CatalogoDB";
@@ -237,6 +269,34 @@ function formatMonto(monto) {
     return `${entero}<span class="decimales">.${decimales}</span>`;
 }
 
+// Función auxiliar para resolver la unidad PZ(S) o JG(S) según el JSON
+function obtenerTextoUnidad(unidadJson) {
+    const unidadNormalizada = String(unidadJson || '').trim().toUpperCase();
+    if (unidadNormalizada === "JUEGOS" || unidadNormalizada === "JUEGO" || unidadNormalizada === "JG") {
+        return "JG";
+    }
+    return "PZ";
+}
+
+// Función unificada para mostrar globos con desvanecimiento suave (fade-out)
+function mostrarGlobo(mensaje, duracion = 3000) {
+    const contenedor = document.getElementById('contenedor-globos');
+    const globo = document.createElement('div');
+    globo.className = 'globo-notificacion';
+    globo.innerText = mensaje;
+    
+    contenedor.appendChild(globo);
+    
+    // Inicia el desvanecimiento antes de que termine el tiempo total
+    setTimeout(() => {
+        globo.style.opacity = '0';
+        // Se remueve del DOM una vez que la transición CSS de 0.5s finaliza
+        setTimeout(() => {
+            globo.remove();
+        }, 500);
+    }, duracion);
+}
+
 function cargarCarrito() {
     if (!db) return;
 
@@ -246,7 +306,14 @@ function cargarCarrito() {
         const requestGetAll = store.getAll();
 
         requestGetAll.onsuccess = function(e) {
-            productosEnCarrito = requestGetAll.result || [];
+            const nuevosProductos = requestGetAll.result || [];
+            
+            // Requerimiento 2 y 3: Si se detecta que aumentó la cantidad de elementos o hay uno nuevo, se lanza el globo
+            if (productosEnCarrito.length > 0 && nuevosProductos.length > productosEnCarrito.length) {
+                mostrarGlobo("AGREGADO AL CARRITO");
+            }
+            
+            productosEnCarrito = nuevosProductos;
             renderizarCarrito();
         };
 
@@ -285,6 +352,9 @@ function renderizarCarrito() {
         const precioUnitario = item.precioUnitario || 0;
         const total = item.total || 0;
         
+        // Requerimiento 1: Asignar PZ o JG dinámicamente usando el campo "Unidad" del JSON
+        const unidadTexto = obtenerTextoUnidad(item.Unidad || item.unidad);
+        
         html += `
             <div class="item-carrito">
                 <div class="item-detalles">
@@ -293,7 +363,7 @@ function renderizarCarrito() {
                 </div>
                 <div class="item-derecha">
                     <div class="item-total">TOTAL: ${formatMonto(total)}</div>
-                    <div class="item-meta">${cantidad} pz x ${formatMonto(precioUnitario)}</div>
+                    <div class="item-meta">${cantidad} ${unidadTexto} X ${formatMonto(precioUnitario)}</div>
                     <div style="margin-top: 4px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
                         <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
@@ -334,8 +404,9 @@ function enviarPedidoWhatsApp() {
         const modelo = item.modelo || '';
         const cantidad = item.cantidad || 1;
         const total = item.total || 0;
+        const unidadTexto = obtenerTextoUnidad(item.Unidad || item.unidad);
         
-        mensaje += `${index + 1}. [${cantidad} pz] - Código ${codigo} - ${categoria} (${modelo}) -> $${total.toFixed(2)}\n`;
+        mensaje += `${index + 1}. [${cantidad} ${unidadTexto}] - Código ${codigo} - ${categoria} (${modelo}) -> $${total.toFixed(2)}\n`;
         sumaTotal += total;
     });
 
@@ -361,6 +432,9 @@ function reiniciarBaseDatosForzado() {
         };
     }
 }
+
+// Ejemplo de uso para mandar el globo promocional (puedes llamarlo cuando tu lógica de negocio lo requiera)
+// mostrarGlobo("AGREGUE 3 PIEZAS PARA OBTENER UN DESCUENTO");
 
 setInterval(cargarCarrito, 2000);
 </script>
