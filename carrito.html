@@ -44,10 +44,10 @@
             border-bottom: 1px solid #eee;
         }
         
-        /* DISEÑO DE LA LISTA: TODO ALINEADO A LA IZQUIERDA */
+        /* DISEÑO DE LA LISTA: ALINEADO A LA IZQUIERDA */
         .item-carrito { 
             display: flex; 
-            flex-direction: column; /* Apila los elementos verticalmente hacia la izquierda */
+            flex-direction: column; 
             justify-content: flex-start; 
             align-items: flex-start; 
             padding: 15px 0; 
@@ -61,7 +61,7 @@
             text-align: left;
         }
         
-        /* FUENTES AUMENTADAS (2px menos que el botón de WhatsApp que tiene 14px -> Quedan en 12px) */
+        /* FUENTES EN 12px (2px menos que el botón de WhatsApp) */
         .item-categoria { 
             font-size: 12px; 
             color: #0071c4; 
@@ -74,7 +74,6 @@
             letter-spacing: 0.5px;
         }
         
-        /* ALINEADO COMPLETAMENTE A LA IZQUIERDA */
         .item-derecha { 
             text-align: left; 
             display: flex; 
@@ -100,7 +99,7 @@
             border: none; 
             color: #adadad; 
             cursor: pointer; 
-            font-size: 12px; /* Uniformado a 12px */
+            font-size: 12px; 
             letter-spacing: 0.5px;
             margin-top: 2px;
             transition: color 0.2s ease;
@@ -140,7 +139,7 @@
             vertical-align: super;
         }
         
-        /* BOTÓN MANDAR PEDIDO POR WHATSAPP (Mantiene fuente de 14px) */
+        /* BOTÓN MANDAR PEDIDO POR WHATSAPP (Mantiene 14px) */
         .btn-accion { 
             display: flex; 
             align-items: center; 
@@ -237,14 +236,25 @@ function formatMonto(monto) {
     return `${entero}<span class="decimales">.${decimales}</span>`;
 }
 
-// Función auxiliar para obtener la abreviación de la unidad basada en el JSON
-function obtenerAbreviacionUnidad(unidad) {
-    if (!unidad) return 'PZ';
-    const uniTexto = unidad.toString().trim().toUpperCase();
+// Función auxiliar encargada de procesar las unidades y aplicar plurales de manera estricta
+function obtenerAbreviacionUnidad(item, cantidad) {
+    // Busca la propiedad guardada por la calculadora sin importar mayúsculas
+    let unidadJson = item.Unidad || item.unidad || item.UNIDAD || '';
+    let uniTexto = unidadJson.toString().trim().toUpperCase();
+    
+    let baseUnidad = 'PZ';
+    
+    // Si contiene la palabra JUEGO, JUEGOS o JG, se asigna como Juego
     if (uniTexto === 'JUEGOS' || uniTexto === 'JUEGO' || uniTexto === 'JG') {
-        return 'JG';
+        baseUnidad = 'JG';
     }
-    return 'PZ';
+    
+    // Si la cantidad es mayor a 1, aplicamos el plural agregando la S (PZS / JGS)
+    if (cantidad > 1) {
+        return baseUnidad + 'S';
+    }
+    
+    return baseUnidad;
 }
 
 function cargarCarrito() {
@@ -264,7 +274,7 @@ function cargarCarrito() {
             document.getElementById('lista-carrito').innerHTML = "<p class='texto-vacio'>Error al cargar productos.</p>";
         };
     } catch(err) {
-        console.log("Error en transaccion de lectura, reintentando...");
+        console.log("Error en la lectura, reintentando de forma automática...");
     }
 }
 
@@ -295,8 +305,8 @@ function renderizarCarrito() {
         const precioUnitario = item.precioUnitario || 0;
         const total = item.total || 0;
         
-        // Se extrae la unidad dinámica (PZ o JG)
-        const unidadLabel = obtenerAbreviacionUnidad(item.Unidad || item.unidad);
+        // Calcula la etiqueta correcta basándose en el JSON y la cantidad actual
+        const unidadLabel = obtenerAbreviacionUnidad(item, cantidad);
         
         html += `
             <div class="item-carrito">
@@ -306,7 +316,7 @@ function renderizarCarrito() {
                 </div>
                 <div class="item-derecha">
                     <div class="item-total">TOTAL: ${formatMonto(total)}</div>
-                    <div class="item-meta">${cantidad} ${unidadLabel} x ${formatMonto(precioUnitario)}</div>
+                    <div class="item-meta">${cantidad} ${unidadLabel} X ${formatMonto(precioUnitario)}</div>
                     <div style="margin-top: 4px;">
                         <button class="btn-eliminar-item" onclick="eliminarProducto('${codigo}')">Eliminar</button>
                         <button class="btn-eliminar-item btn-editar-item" onclick="window.open('${url}', '_blank')">Editar</button>
@@ -348,8 +358,7 @@ function enviarPedidoWhatsApp() {
         const cantidad = item.cantidad || 1;
         const total = item.total || 0;
         
-        // Se extrae la unidad dinámica también para el mensaje final de WhatsApp
-        const unidadLabel = obtenerAbreviacionUnidad(item.Unidad || item.unidad);
+        const unidadLabel = obtenerAbreviacionUnidad(item, cantidad);
         
         mensaje += `${index + 1}. [${cantidad} ${unidadLabel.toLowerCase()}] - Código ${codigo} - ${categoria} (${modelo}) -> $${total.toFixed(2)}\n`;
         sumaTotal += total;
@@ -378,6 +387,7 @@ function reiniciarBaseDatosForzado() {
     }
 }
 
+// Escucha en segundo plano para actualizar la interfaz al agregar ítems desde las calculadoras externas
 setInterval(cargarCarrito, 2000);
 </script>
 </body>
