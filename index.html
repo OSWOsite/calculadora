@@ -189,6 +189,7 @@
             overflow: visible;
         }
 
+        /* Estructura base unificada para todos los globos flotantes */
         .aviso-descuento {
             position: absolute;
             top: -2px;
@@ -273,6 +274,7 @@
             background: #ffffff; 
             color: #666666; 
             border: 1px solid #adadad;
+            margin-bottom: 4px;
         }
         .btn-ws:hover {
             border-color: #666666;
@@ -302,14 +304,6 @@
             font-size: 18px; 
             display: inline-block;
             margin: 4px 0;
-        }
-
-        .toast-msg {
-            display: none;
-            text-align: center;
-            color: #0071c4;
-            font-size: 14px;
-            margin-top: 8px;
         }
         
         .error-msg { 
@@ -349,6 +343,7 @@
     let descuentoPct = 0;
     let db = null;
     let avisoMostrado = false;
+    let timeoutGlobo = null; // Guardará la referencia para limpiar animaciones previas
 
     function inicializarDB() {
         return new Promise((resolve, reject) => {
@@ -436,14 +431,14 @@
                     </div>
                 </div>
 
-                ${tieneDescuento ? `<div class="aviso-wrapper">
+                <div class="aviso-wrapper">
                     <div class="aviso-descuento" id="aviso-desc">
-                        <span class="aviso-icono">🏷️</span>
+                        <span class="aviso-icono" id="aviso-icono">🏷️</span>
                         <span class="aviso-texto" id="aviso-texto"></span>
                     </div>
-                </div>` : ''}
+                </div>
 
-                <div class="total-container" style="${tieneDescuento ? 'margin-top: 10px;' : ''}">
+                <div class="total-container" style="margin-top: 10px;">
                     <span class="total-label">Total estimado:</span>
                     <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
                 </div>
@@ -452,7 +447,6 @@
                 <button class="btn-accion btn-cart" onclick="agregarAlCarrito()">Agregar al Carrito</button>
                 
                 <p id="fecha-entrega"></p>
-                <div class="toast-msg" id="msg-agregado">¡Agregado al carrito!</div>
             </div>
         `;
 
@@ -491,6 +485,27 @@
         actualizarUI();
     }
 
+    // Lógica encargada de gestionar la animación suave de salida para cualquier globo
+    function lanzarGloboDinamico(texto, icono = "🏷️", duracion = 3500) {
+        const avisoDesc = document.getElementById('aviso-desc');
+        const avisoTexto = document.getElementById('aviso-texto');
+        const avisoIcono = document.getElementById('aviso-icono');
+        
+        if (!avisoDesc) return;
+
+        // Limpiamos timeouts previos si el usuario hace clics rápidos
+        clearTimeout(timeoutGlobo);
+
+        avisoIcono.textContent = icono;
+        avisoTexto.innerHTML = texto;
+        avisoDesc.classList.add('visible');
+
+        // Se quita suavemente con la transición CSS tras completarse los segundos establecidos
+        timeoutGlobo = setTimeout(() => {
+            avisoDesc.classList.remove('visible');
+        }, duracion);
+    }
+
     function actualizarUI() {
         const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
         const unidad = productoActual.Unidad || 'PIEZAS';
@@ -525,26 +540,17 @@
         }
 
         const avisoDesc = document.getElementById('aviso-desc');
-        const avisoTexto = document.getElementById('aviso-texto');
 
+        // Modificación del aviso original de descuento para usar desvanecimiento controlado
         if (!descuentoAplicado && cantidad > umbral75 && !avisoMostrado) {
             const faltantes = umbralNumerico - cantidad;
-            avisoTexto.innerHTML = `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
-            avisoDesc.classList.add('visible');
+            const textoMensaje = `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
+            
+            lanzarGloboDinamico(textoMensaje, "🏷️", 4000);
             avisoMostrado = true;
-
-            function cerrarAviso() {
-                avisoDesc.classList.remove('visible');
-                document.removeEventListener('click', cerrarAviso);
-                document.removeEventListener('touchstart', cerrarAviso);
-            }
-            setTimeout(() => {
-                document.addEventListener('click', cerrarAviso);
-                document.addEventListener('touchstart', cerrarAviso);
-            }, 400);
         }
 
-        if (descuentoAplicado && avisoDesc) {
+        if (descuentoAplicado && avisoDesc && avisoDesc.classList.contains('visible')) {
             avisoDesc.classList.remove('visible');
         }
     }
@@ -578,7 +584,8 @@
             cantidad: parseInt(cantidad),
             precioUnitario: precio,
             total: total,
-            URL: productoActual.URL || '#' // <--- CORRECCIÓN: Guarda el enlace del catálogo externo (Google Sites)
+            URL: productoActual.URL || '#',
+            Unidad: productoActual.Unidad || 'PIEZAS' // <--- SOLUCIÓN COMPLETA: Ahora el dato viaja seguro a IndexedDB
         };
         
         const transaction = db.transaction(["carrito"], "readwrite");
@@ -586,12 +593,13 @@
         const requestAdd = store.put(item);
         
         requestAdd.onsuccess = function() {
-            const aviso = document.getElementById('msg-agregado');
-            aviso.style.display = 'block';
-            setTimeout(() => { aviso.style.display = 'none'; }, 3000);
+            // Muestra el globo flotante arriba alineado, reemplazando la lógica tosca del label inferior
+            lanzarGloboDinamico("¡AGREGADO AL CARRITO CON ÉXITO!", "🛒", 3000);
+            
             const input = document.getElementById('cant-input');
             input.value = 1;
             cantidad = 1;
+            avisoMostrado = false; // Permite que se vuelva a recalcular alertas de umbrales
             actualizarUI();
         };
 
