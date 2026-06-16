@@ -61,15 +61,15 @@
             text-align: left;
         }
         
-        /* FUENTES EN 12px (2px menos que el botón de WhatsApp) */
+        /* FUENTES EN 15px (Agrandado 3px para móvil y pc) */
         .item-categoria { 
-            font-size: 12px; 
+            font-size: 15px; 
             color: #0071c4; 
             margin-bottom: 4px;
         }
         
         .item-modelo { 
-            font-size: 12px; 
+            font-size: 15px; 
             color: #666666; 
             letter-spacing: 0.5px;
         }
@@ -84,13 +84,13 @@
         }
         
         .item-total { 
-            font-size: 12px; 
+            font-size: 15px; 
             color: #0071c4; 
             font-weight: 400;
         }
         
         .item-meta { 
-            font-size: 12px; 
+            font-size: 15px; 
             color: #666666; 
         }
         
@@ -99,7 +99,7 @@
             border: none; 
             color: #adadad; 
             cursor: pointer; 
-            font-size: 12px; 
+            font-size: 15px; 
             letter-spacing: 0.5px;
             margin-top: 2px;
             transition: color 0.2s ease;
@@ -167,7 +167,7 @@
             text-align: center;
             color: #666666;
             padding: 20px 0;
-            font-size: 12px;
+            font-size: 15px;
         }
 
         .texto-auxilio {
@@ -191,7 +191,7 @@
 <div class="container">
     <h2>Tu lista de pedido</h2>
     
-    <div id="lista-carrito" style="text-align: center; color: #666666; padding: 20px 0; font-size: 12px;">
+    <div id="lista-carrito" style="text-align: center; color: #666666; padding: 20px 0; font-size: 15px;">
         Cargando productos del carrito...
         <br>
         <span class="texto-auxilio" onclick="reiniciarBaseDatosForzado()">
@@ -236,20 +236,16 @@ function formatMonto(monto) {
     return `${entero}<span class="decimales">.${decimales}</span>`;
 }
 
-// Función auxiliar encargada de procesar las unidades y aplicar plurales de manera estricta
 function obtenerAbreviacionUnidad(item, cantidad) {
-    // Busca la propiedad guardada por la calculadora sin importar mayúsculas
     let unidadJson = item.Unidad || item.unidad || item.UNIDAD || '';
     let uniTexto = unidadJson.toString().trim().toUpperCase();
     
     let baseUnidad = 'PZ';
     
-    // Si contiene la palabra JUEGO, JUEGOS o JG, se asigna como Juego
     if (uniTexto === 'JUEGOS' || uniTexto === 'JUEGO' || uniTexto === 'JG') {
         baseUnidad = 'JG';
     }
     
-    // Si la cantidad es mayor a 1, aplicamos el plural agregando la S (PZS / JGS)
     if (cantidad > 1) {
         return baseUnidad + 'S';
     }
@@ -305,7 +301,6 @@ function renderizarCarrito() {
         const precioUnitario = item.precioUnitario || 0;
         const total = item.total || 0;
         
-        // Calcula la etiqueta correcta basándose en el JSON y la cantidad actual
         const unidadLabel = obtenerAbreviacionUnidad(item, cantidad);
         
         html += `
@@ -387,7 +382,6 @@ function reiniciarBaseDatosForzado() {
     }
 }
 
-// Escucha en segundo plano para actualizar la interfaz al agregar ítems desde las calculadoras externas
 setInterval(cargarCarrito, 2000);
 </script>
 </body>
