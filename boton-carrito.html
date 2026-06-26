@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso al Carrito</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap" rel="stylesheet">
     
     <style>
         * { 
@@ -36,14 +36,17 @@
 
         .btn-carrito-estatico {
             position: relative;
-            width: 55px;
-            height: 55px;
+            width: 100%;
+            max-width: 220px; /* Tamaño ideal para que sea responsivo */
+            height: 50px;
             background: #ffffff;
             border: 1px solid #adadad;
-            border-radius: 50%;
+            border-radius: 6px; /* Transición a diseño rectangular minimalista */
             display: flex;
             align-items: center;
             justify-content: center;
+            gap: 8px; /* Separación entre icono y texto */
+            padding: 0 16px;
             cursor: pointer;
             text-decoration: none;
             transition: all 0.2s ease;
@@ -55,37 +58,60 @@
         }
 
         .btn-carrito-estatico svg {
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             fill: #666666;
             transition: fill 0.2s ease;
+            flex-shrink: 0;
         }
 
+        .btn-carrito-estatico .texto-carrito {
+            color: #666666;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            transition: color 0.2s ease;
+        }
+
+        /* Efectos hover unificados para icono y texto */
         .btn-carrito-estatico:hover svg {
             fill: #0071c4;
         }
+        
+        .btn-carrito-estatico:hover .texto-carrito {
+            color: #0071c4;
+        }
 
+        /* Ajustes para la píldora numérica */
         .indicador-pildora {
             position: absolute;
-            top: 0;
-            right: 0;
-            width: 14px;
-            height: 14px;
+            top: -8px;
+            right: -8px;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
             background-color: #0071c4;
             border: 2px solid #ffffff;
-            border-radius: 50%;
+            border-radius: 10px;
             display: none; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1.5);
+            /* Estilos del número */
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: none;
         }
 
         .indicador-pildora.activo {
-            display: block;
+            display: flex; /* Cambiado a flex para centrar el número */
             animation: pulsoEfecto 1.5s infinite ease-in-out;
         }
 
         @keyframes pulsoEfecto {
             0% { transform: scale(1); }
-            50% { transform: scale(1.15); }
+            50% { transform: scale(1.08); }
             100% { transform: scale(1); }
         }
     </style>
@@ -93,12 +119,12 @@
 <body>
 
 <div class="contenedor-carrito-bloque">
-    <!-- CORRECCIÓN: CAMBIADO A target="_blank" PARA EVITAR EL RECHAZO DE CONEXIÓN DE GOOGLE SITES -->
     <a href="https://sites.google.com/view/oswocatlogo/carrito" target="_blank" class="btn-carrito-estatico" title="Ver mi carrito">
         <svg viewBox="0 0 24 24">
             <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>
         </svg>
-        <div class="indicador-pildora" id="indicador-visual"></div>
+        <span class="texto-carrito">Carrito</span>
+        <div class="indicador-pildora" id="indicador-visual">0</div>
     </a>
 </div>
 
@@ -129,7 +155,10 @@
             requestGetAll.onsuccess = function() {
                 const puntoAzul = document.getElementById('indicador-visual');
                 if (puntoAzul) {
-                    if (requestGetAll.result && requestGetAll.result.length > 0) {
+                    const cantidadCodigos = requestGetAll.result ? requestGetAll.result.length : 0;
+                    
+                    if (cantidadCodigos > 0) {
+                        puntoAzul.textContent = cantidadCodigos; // Inserta el número de artículos diferentes
                         puntoAzul.classList.add('activo');
                     } else {
                         puntoAzul.classList.remove('activo');
