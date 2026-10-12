@@ -14,7 +14,7 @@
     "Código": "44",
     "Categoria": "JARRA",
     "Modelo": "3886 MEXICO 1L",
-    "Precio": "$84.62",
+    "Precio": "$66.95",
     "Unidad": "PIEZAS",
     "Umbral": "6",
     "Descuento": "10%",
@@ -195,6 +195,17 @@
     "Umbral": "12",
     "Descuento": "10%",
     "URL": "https://sites.google.com/view/oswocatlogo/188",
+    "": ""
+  },
+  {
+    "Código": "199",
+    "Categoria": "COPA AGUA",
+    "Modelo": "LEXINGTON 355ML",
+    "Precio": "$19.23",
+    "Unidad": "PIEZAS",
+    "Umbral": "48",
+    "Descuento": "15%",
+    "URL": "https://sites.google.com/view/oswocatlogo/199",
     "": ""
   },
   {
@@ -415,6 +426,17 @@
     "Umbral": "6",
     "Descuento": "10%",
     "URL": "https://sites.google.com/view/oswocatlogo/322",
+    "": ""
+  },
+  {
+    "Código": "382",
+    "Categoria": "JUEGO DE VASOS",
+    "Modelo": "BOSTON 6PZ",
+    "Precio": "$98.18",
+    "Unidad": "JUEGOS",
+    "Umbral": "6",
+    "Descuento": "20%",
+    "URL": "https://sites.google.com/view/oswocatlogo/382",
     "": ""
   },
   {
@@ -916,10 +938,10 @@
     "Código": "984",
     "Categoria": "BATERIA DE COCINA",
     "Modelo": "PREMIER 12PZ ACERO INOX",
-    "Precio": "$1,500.00",
+    "Precio": "$1,392.86",
     "Unidad": "JUEGOS",
     "Umbral": "4",
-    "Descuento": "30%",
+    "Descuento": "20%",
     "URL": "https://sites.google.com/view/oswocatlogo/984",
     "": ""
   },
@@ -943,6 +965,17 @@
     "Umbral": "10",
     "Descuento": "5%",
     "URL": "https://sites.google.com/view/oswocatlogo/1002",
+    "": ""
+  },
+  {
+    "Código": "1010",
+    "Categoria": "OLLA DE PRESIÓN",
+    "Modelo": "PRESTO PREMIER 6L",
+    "Precio": "1297.83",
+    "Unidad": "PIEZAS",
+    "Umbral": "100",
+    "Descuento": "0%",
+    "URL": "https://sites.google.com/view/oswocatlogo/1010",
     "": ""
   },
   {
@@ -1264,202 +1297,4 @@
     "URL": "https://sites.google.com/view/oswocatlogo/2018",
     "": ""
   },
-  {
-    "Código": "199",
-    "Categoria": "COPA AGUA",
-    "Modelo": "LEXINGTON 355ML",
-    "Precio": "$19.23",
-    "Unidad": "PIEZAS",
-    "Umbral": "48",
-    "Descuento": "15%",
-    "URL": "https://sites.google.com/view/oswocatlogo/199",
-    "": ""
-  },
-  {
-    "Código": "382",
-    "Categoria": "JUEGO DE VASOS",
-    "Modelo": "BOSTON 6PZ",
-    "Precio": "$98.18",
-    "Unidad": "JUEGOS",
-    "Umbral": "6",
-    "Descuento": "20%",
-    "URL": "https://sites.google.com/view/oswocatlogo/382",
-    "": ""
-  },
-  {
-    "Código": "1010",
-    "Categoria": "OLLA DE PRESIÓN",
-    "Modelo": "PRESTO PREMIER 6L",
-    "Precio": "1297.83",
-    "Unidad": "PIEZAS",
-    "Umbral": "100",
-    "Descuento": "0%",
-    "URL": "https://sites.google.com/view/oswocatlogo/1010",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  },
-  {
-    "Código": "",
-    "Categoria": "",
-    "Modelo": "",
-    "Precio": "",
-    "Unidad": "",
-    "Umbral": "",
-    "Descuento": "",
-    "URL": "",
-    "": ""
-  }
-]
+   ]
