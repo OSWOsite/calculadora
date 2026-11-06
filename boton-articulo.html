@@ -25,15 +25,14 @@
     padding: 2px 2px 6px;
   }
   .boton {
-    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
+    gap: 8px;
     width: 100%;
     max-width: 300px;
     min-height: 40px;
-    padding: 7px 14px;
+    padding: 7px 12px;
     border-radius: 6px;
     border: 1px solid #c8c8c8;
     background: linear-gradient(180deg, #ffffff 0%, #eef5fb 100%);
@@ -44,21 +43,13 @@
     color: var(--azul);
     font-size: 16px;
     font-weight: 500;
+    line-height: 1.1;
+    white-space: nowrap;          /* evita que el texto se parta en dos líneas */
     text-decoration: none;
     letter-spacing: .2px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
-  }
-  .boton svg {
-    width: 18px;
-    height: 18px;
-    flex: none;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
   }
   .boton:hover {
     background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
@@ -78,7 +69,7 @@
     font-size: 13px;
     font-weight: 400;
     color: var(--gris);
-    padding: 2px 8px;
+    padding: 2px 7px;
     border-radius: 6px;
     background: rgba(0, 113, 196, .08);
     transition: color .18s ease, background .18s ease;
@@ -88,42 +79,19 @@
     background: rgba(255, 255, 255, .2);
   }
   .sku:empty { display: none; }
-  /* Animación al tocar: relleno azul, pulso y onda desde el punto de contacto */
-  .boton { overflow: hidden; }
-  .boton > span, .boton > svg { position: relative; z-index: 1; }
-  .onda {
-    position: absolute;
-    z-index: 0;
-    width: 12px;
-    height: 12px;
-    margin: -6px 0 0 -6px;
-    border-radius: 50%;
-    background: rgba(0, 113, 196, .35);
-    pointer-events: none;
-    animation: onda .55s ease-out forwards;
+
+  /* Espacios angostos (por ejemplo, 2 barras de Google Sites) */
+  @media (max-width: 200px) {
+    .boton { font-size: 14px; padding: 6px 8px; gap: 6px; min-height: 36px; }
+    .sku { font-size: 12px; padding: 1px 6px; }
   }
-  @keyframes onda {
-    to { transform: scale(40); opacity: 0; }
-  }
-  .boton.tocado {
-    background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
-    border-color: #a6a6a6;
-    color: #ffffff;
-    animation: pulso .28s ease-out;
-  }
-  .boton.tocado .sku { color: #ffffff; background: rgba(255, 255, 255, .2); }
-  @keyframes pulso {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(.95); }
-    100% { transform: scale(1); }
-  }
-  @media (max-width: 380px) {
-    .boton { font-size: 15px; padding: 7px 12px; }
+  @media (max-width: 150px) {
+    .boton { font-size: 13px; padding: 5px 6px; gap: 5px; }
+    .sku { font-size: 11px; padding: 1px 5px; }
   }
   @media (prefers-reduced-motion: reduce) {
     .boton, .sku { transition: none; }
     .boton:hover { transform: none; }
-    .boton.tocado, .onda { animation: none; }
   }
 </style>
 </head>
@@ -132,9 +100,6 @@
 <a id="boton" class="boton" href="https://sites.google.com/view/oswocatlogo" target="_blank" rel="noopener noreferrer">
   <span>Ver artículo</span>
   <span class="sku" id="sku"></span>
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path d="M14 4h6v6"/><path d="M20 4l-9 9"/><path d="M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>
-  </svg>
 </a>
 
 <script>
@@ -152,52 +117,6 @@
     document.getElementById("sku").textContent = sku;
     boton.setAttribute("aria-label", "Ver artículo " + sku);
   }
-
-  // Animación al tocar y apertura con una breve pausa para que se vea
-  var DEMORA = 280; // milisegundos antes de abrir la página
-  var reducir = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var animado = false;
-
-  function animar(x, y) {
-    animado = true;
-    boton.classList.remove("tocado");
-    void boton.offsetWidth; // reinicia la animación
-    boton.classList.add("tocado");
-    if (!reducir) {
-      var r = boton.getBoundingClientRect();
-      var onda = document.createElement("span");
-      onda.className = "onda";
-      onda.style.left = (x - r.left) + "px";
-      onda.style.top = (y - r.top) + "px";
-      boton.appendChild(onda);
-      setTimeout(function () { onda.remove(); }, 600);
-    }
-  }
-
-  // Respuesta inmediata al contacto con el dedo
-  boton.addEventListener("pointerdown", function (e) {
-    animar(e.clientX, e.clientY);
-  });
-
-  boton.addEventListener("click", function (e) {
-    e.preventDefault();
-    if (!animado) { // teclado u otros casos sin pointerdown
-      var r = boton.getBoundingClientRect();
-      animar(r.left + r.width / 2, r.top + r.height / 2);
-    }
-    var url = boton.href;
-    setTimeout(function () {
-      var a = document.createElement("a");
-      a.href = url;
-      a.target = "_blank";
-      a.rel = "noopener noreferrer";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      boton.classList.remove("tocado");
-      animado = false;
-    }, reducir ? 0 : DEMORA);
-  });
 </script>
 
 </body>
