@@ -5,55 +5,67 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Producto - Minimalista</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap" rel="stylesheet">
-    
+
     <style>
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Fredoka', sans-serif; 
-            text-transform: uppercase; 
-            font-weight: 400;
+        :root {
+            --azul: #0071c4;
+            --gris: #666666;
         }
-        
-        body { 
-            background-color: #ffffff; 
-            padding: 0; 
-            margin: 0; 
-            display: flex; 
-            justify-content: center; 
-            align-items: flex-start; 
-            min-height: 100vh; 
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Fredoka', sans-serif;
+            text-transform: uppercase;
         }
-        
-        .card { 
-            background: #ffffff; 
-            border-radius: 0; 
-            padding: 0 0 20px 0; 
-            max-width: 400px; 
-            width: 100%; 
-            box-shadow: none; 
-            border: none; 
+
+        body {
+            background-color: #ffffff;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            /* TAMAÑO Y FORMATO ÚNICO para todos los textos (el título lo cambia aparte) */
+            font-size: 16px;
+            font-weight: 500;
         }
-        
-        .info-producto { 
-            margin-bottom: 30px; 
+
+        button, input {
+            font-size: inherit;
+            font-weight: inherit;
+        }
+
+        .card {
+            background: #ffffff;
+            border-radius: 0;
+            padding: 0 0 20px 0;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: none;
+            border: none;
+        }
+
+        .info-producto {
+            margin-bottom: 30px;
             text-align: left;
             min-height: 80px;
         }
-        
-        .categoria { 
-            font-size: 20px; 
-            color: #0071c4; 
-            margin-bottom: 6px; 
+
+        /* ÚNICO texto con tamaño distinto: el título */
+        .categoria {
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--azul);
+            margin-bottom: 6px;
         }
-        
-        .modelo { 
-            font-size: 14px; 
-            font-weight: 500;
-            color: #666666; 
+
+        .modelo {
+            color: var(--gris);
             letter-spacing: 1px;
-            margin-bottom: 14px; 
+            margin-bottom: 14px;
         }
 
         .precio-wrapper {
@@ -65,9 +77,9 @@
             overflow: hidden;
         }
 
-        .precio { 
-            font-size: 26px; 
-            color: #666666;
+        .precio {
+            color: var(--gris);
+            font-size: 20px;
             transition: color 0.4s ease;
         }
 
@@ -78,6 +90,9 @@
         .precio-entero-tachado {
             text-decoration: line-through;
         }
+
+        .unidad { color: var(--gris); font-size: 16px; }
+        .unidad.azul { color: var(--azul); }
 
         .precio-descuento-row {
             position: absolute;
@@ -96,30 +111,29 @@
         }
 
         .precio-nuevo {
-            font-size: 30px;
-            color: #0071c4;
+            color: var(--azul);
+            font-size: 20px;
             white-space: nowrap;
         }
 
         .badge-descuento {
-            font-size: 16px;
             color: #ffffff;
-            background: #0071c4;
+            background: var(--azul);
             padding: 4px 10px;
-            border-radius: 3px;
+            border-radius: 6px;
             letter-spacing: 0.5px;
             white-space: nowrap;
         }
-        
+
         .seccion-interactiva {
             display: flex;
             flex-direction: column;
-            gap: 16px; 
+            gap: 16px;
         }
 
-        .panel-cantidad{
+        .panel-cantidad {
             display: flex;
-            background: transparent; 
+            background: transparent;
             padding: 15px 0;
             align-items: center;
             justify-content: space-between;
@@ -144,34 +158,79 @@
         .panel-cantidad::before { top: 0; }
         .panel-cantidad::after { bottom: 0; }
 
-        .col-botones-canti{
+        .col-botones-canti {
             display: flex;
             flex-direction: column;
             gap: 8px;
-            width: 45%; 
+            width: 45%;
         }
 
-        .btn-canti { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #adadad; 
-            background: #ffffff; 
-            font-size: 18px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            color: #666666; 
+        /* ---------- Diseño unificado de botones (cristal claro) ---------- */
+        .btn-canti,
+        .btn-accion {
             display: flex;
             align-items: center;
             justify-content: center;
-            line-height: 1;
-            transition: all 0.2s ease;
+            gap: 8px;
+            width: 100%;
+            min-height: 40px;
+            padding: 7px 12px;
+            border-radius: 6px;
+            border: 1px solid #c8c8c8;
+            background: linear-gradient(180deg, #ffffff 0%, #eef5fb 100%);
+            box-shadow:
+                inset 0 1px 0 #ffffff,
+                0 1px 2px rgba(0, 0, 0, .10),
+                0 4px 10px -3px rgba(0, 0, 0, .22);
+            color: var(--azul);
+            line-height: 1.1;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
         }
-        .btn-canti:hover {
-            border-color: #666666;
-            color: #0071c4;
+        .btn-canti:hover,
+        .btn-accion:hover {
+            background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
+            border-color: #a6a6a6;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, .25),
+                0 6px 14px -4px rgba(0, 0, 0, .32);
         }
-        
-        .col-display-canti{
+        .btn-canti:active,
+        .btn-accion:active { transform: translateY(0); }
+        .btn-canti:focus-visible,
+        .btn-accion:focus-visible {
+            outline: 3px solid rgba(0, 113, 196, .45);
+            outline-offset: 2px;
+        }
+
+        .btn-ws { margin-bottom: 4px; }
+
+        /* Botón principal: azul sólido */
+        .btn-cart {
+            background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
+            border-color: #005fa3;
+            color: #ffffff;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, .25),
+                0 1px 2px rgba(0, 0, 0, .15),
+                0 4px 10px -3px rgba(0, 95, 163, .5);
+        }
+        .btn-cart:hover {
+            background: linear-gradient(180deg, #0a7bd0 0%, #005fa3 100%);
+            border-color: #004f88;
+            color: #ffffff;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, .2),
+                0 6px 14px -4px rgba(0, 95, 163, .6);
+        }
+
+
+        .col-display-canti {
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -179,22 +238,21 @@
             justify-content: center;
         }
 
-        .label-canti{
-            font-size: 16px; 
-            color: #666666;
+        .label-canti {
+            color: var(--gris);
             margin-bottom: 6px;
         }
 
-        .input-canti { 
-            width: 100%; 
-            border: none; 
-            background: transparent; 
-            text-align: center; 
-            font-size: 26px; 
-            color: #0071c4; 
+        .input-canti {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            color: var(--azul);
+            font-size: 20px;
         }
         .input-canti:focus { outline: none; }
-        
+
         .input-canti::-webkit-outer-spin-button,
         .input-canti::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -216,8 +274,8 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            border-radius: 4px;
-            background: #0071c4;
+            border-radius: 6px;
+            background: var(--azul);
             padding: 11px 14px;
             cursor: pointer;
             opacity: 0;
@@ -234,80 +292,46 @@
         }
 
         .aviso-icono {
-            font-size: 18px;
             flex-shrink: 0;
             line-height: 1;
         }
 
         .aviso-texto {
-            font-size: 13px;
             color: #ffffff;
             letter-spacing: 0.3px;
             line-height: 1.35;
         }
 
         .aviso-texto strong {
-            font-weight: 400;
+            font-weight: inherit;
             color: #ffffff;
         }
-        
-        .total-container { 
+
+        /* ===== TOTAL: mismas columnas que la cantidad ===== */
+        .total-container {
             position: relative;
             overflow: visible;
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
+            display: flex;
+            align-items: center;
             margin: 10px 0 20px 0;
         }
-        
-        .total-label { 
-            font-size: 14px; 
-            font-weight: 500;
-            color: #666666; 
+
+        .total-label {
+            width: 45%;              /* igual que la columna de botones */
+            color: var(--gris);
             letter-spacing: 1px;
         }
-        
-        .total-val { 
-            font-size: 28px; 
-            color: #0071c4; 
+
+        .total-val {
+            flex: 1;                 /* igual que la columna de la cantidad */
+            text-align: center;      /* queda centrado justo bajo el número de cantidad */
+            color: var(--azul);
+            font-size: 20px;
         }
-        
+
         .decimales {
             font-size: 0.65em;
             vertical-align: super;
-        }
-        
-        .btn-accion { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            width: 100%; 
-            padding: 16px; 
-            border-radius: 4px; 
-            font-size: 14px; 
-            cursor: pointer; 
-            letter-spacing: 1px; 
-            transition: all 0.2s ease;
-        }
-
-        .btn-ws { 
-            background: #ffffff; 
-            color: #666666; 
-            border: 1px solid #adadad;
-            margin-bottom: 4px;
-        }
-        .btn-ws:hover {
-            border-color: #666666;
-            color: #0071c4;
-        }
-        
-        .btn-cart { 
-            background: #0071c4; 
-            color: #ffffff; 
-            border: none; 
-        }
-        .btn-cart:hover {
-            background: #005fa3;
         }
 
         /* ===== FECHA DE ENTREGA (sin sombra) ===== */
@@ -316,14 +340,11 @@
             margin: 0;
             padding: 28px 10px;
             box-sizing: border-box;
-
             background-color: #FFFFFF;
-            color: #666666;
-
+            color: var(--gris);
             text-align: center;
             text-transform: uppercase;
             letter-spacing: 1px;
-
             position: relative;
         }
 
@@ -335,7 +356,6 @@
             left: 0;
             width: 100%;
             height: 1px;
-
             background: linear-gradient(
                 90deg,
                 rgba(255,255,255,0),
@@ -344,42 +364,32 @@
             );
         }
 
-        #oswo-ultra-minimal .texto {
-            font-size: 16px;
-            font-weight: 500;
-        }
-
         #oswo-ultra-minimal .fecha {
             display: block;
             margin-top: 8px;
-
-            font-size: 14px;
-            font-weight: 500;
-
             color: #b7b7b7;
             letter-spacing: 1px;
         }
-        
-        .error-msg { 
-            color: #666666; 
-            text-align: center; 
-            padding: 30px 0; 
-            font-size: 16px;
+
+        .error-msg {
+            color: var(--gris);
+            text-align: center;
+            padding: 30px 0;
         }
-        
+
         #loading {
             text-align: center;
-            color: #666666;
+            color: var(--gris);
             padding: 30px 0;
         }
 
         @media (max-width: 600px) {
-            .card { padding: 0 0 15px 0; } 
-            .btn-canti { padding: 10px; }
-            .btn-accion { padding: 14px; }
+            .card { padding: 0 0 15px 0; }
+        }
 
-            #oswo-ultra-minimal .texto { font-size: 14px; }
-            #oswo-ultra-minimal .fecha { font-size: 16px; }
+        @media (prefers-reduced-motion: reduce) {
+            .btn-canti, .btn-accion, .aviso-descuento, .precio, .precio-descuento-row { transition: none; }
+            .btn-canti:hover, .btn-accion:hover { transform: none; }
         }
     </style>
 </head>
@@ -390,7 +400,7 @@
 </div>
 
 <script>
-    const TELEFONO_WHATSAPP = "525521133250"; 
+    const TELEFONO_WHATSAPP = "525521133250";
     let productoActual = null;
     let cantidad = 1;
     let precioNumerico = 0;
@@ -464,7 +474,7 @@
                 <div class="categoria">${productoActual.Categoria}</div>
                 <div class="modelo">${productoActual.Modelo}</div>
                 <div class="precio-wrapper">
-                    <span class="precio" id="precio-base"><span id="precio-entero">${formatEntero(precioNumerico)}</span><span class="decimales" id="precio-cents">.${formatCents(precioNumerico)}</span> <span style="font-size:12px; color:#666666;">C/U</span></span>
+                    <span class="precio" id="precio-base"><span id="precio-entero">${formatEntero(precioNumerico)}</span><span class="decimales" id="precio-cents">.${formatCents(precioNumerico)}</span> <span class="unidad">C/U</span></span>
                     ${tieneDescuento ? `
                     <div class="precio-descuento-row" id="precio-descuento-row">
                         <span class="precio-nuevo" id="precio-nuevo"></span>
@@ -473,12 +483,12 @@
                     ` : ''}
                 </div>
             </div>
-            
+
             <div class="seccion-interactiva">
                 <div class="panel-cantidad">
                     <div class="col-botones-canti">
-                        <button class="btn-canti" onclick="modificarCantidad(1)">+</button>
-                        <button class="btn-canti" onclick="modificarCantidad(-1)">-</button>
+                        <button class="btn-canti" onclick="modificarCantidad(1)" aria-label="Aumentar cantidad">+</button>
+                        <button class="btn-canti" onclick="modificarCantidad(-1)" aria-label="Disminuir cantidad">-</button>
                     </div>
                     <div class="col-display-canti">
                         <span class="label-canti">Cantidad</span>
@@ -498,9 +508,13 @@
                     <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
                 </div>
 
-                <button class="btn-accion btn-ws" onclick="enviarWhatsApp()">Pedir por WhatsApp</button>
-                <button class="btn-accion btn-cart" onclick="agregarAlCarrito()">Agregar al Carrito</button>
-                
+                <button class="btn-accion btn-ws" onclick="enviarWhatsApp()">
+                    Pedir por WhatsApp
+                </button>
+                <button class="btn-accion btn-cart" onclick="agregarAlCarrito()">
+                    Agregar al carrito
+                </button>
+
                 <div id="oswo-ultra-minimal">
                     <div class="texto">
                         PIDA HOY Y RECIBA EL
@@ -550,7 +564,7 @@
         const avisoDesc = document.getElementById('aviso-desc');
         const avisoTexto = document.getElementById('aviso-texto');
         const avisoIcono = document.getElementById('aviso-icono');
-        
+
         if (!avisoDesc) return;
 
         // Limpiamos timeouts previos si el usuario hace clics rápidos
@@ -590,7 +604,7 @@
         if (descuentoAplicado) {
             precioBase.classList.add('reducido');
             precioEntero.classList.add('precio-entero-tachado');
-            precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span style="font-size:13px; color:#0071c4;">C/U</span>';
+            precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span class="unidad azul">C/U</span>';
             badgeDesc.textContent = `-${descuentoPct}%`;
             precioDesRow.classList.add('visible');
         } else {
@@ -605,7 +619,7 @@
         if (!descuentoAplicado && cantidad > umbral75 && !avisoMostrado) {
             const faltantes = umbralNumerico - cantidad;
             const textoMensaje = `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
-            
+
             lanzarGloboDinamico(textoMensaje, "🏷️", 4000);
             avisoMostrado = true;
         }
@@ -636,7 +650,7 @@
 
         const precio = precioEfectivo();
         const total = parseFloat((cantidad * precio).toFixed(2));
-        
+
         const item = {
             codigo: String(productoActual.Código),
             categoria: productoActual.Categoria,
@@ -645,17 +659,16 @@
             precioUnitario: precio,
             total: total,
             URL: productoActual.URL || '#',
-            Unidad: productoActual.Unidad || 'PIEZAS' // <--- SOLUCIÓN COMPLETA: Ahora el dato viaja seguro a IndexedDB
+            Unidad: productoActual.Unidad || 'PIEZAS'
         };
-        
+
         const transaction = db.transaction(["carrito"], "readwrite");
         const store = transaction.objectStore("carrito");
         const requestAdd = store.put(item);
-        
+
         requestAdd.onsuccess = function() {
-            // Muestra el globo flotante arriba alineado, reemplazando la lógica tosca del label inferior
             lanzarGloboDinamico("¡AGREGADO AL CARRITO CON ÉXITO!", "🛒", 3000);
-            
+
             const input = document.getElementById('cant-input');
             input.value = 1;
             cantidad = 1;
