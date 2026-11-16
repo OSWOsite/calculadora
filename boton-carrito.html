@@ -22,8 +22,8 @@
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    /* Espacio arriba y a la derecha para que el globo no se corte */
-    padding: 12px 12px 8px 2px;
+    /* Espacio a la derecha para que el globo no se corte; arriba solo un poco para el halo */
+    padding: 6px 12px 8px 2px;
   }
 
   .contenedor {
@@ -84,7 +84,8 @@
   /* ---------- Globo con el número de artículos ---------- */
   .globo {
     position: absolute;
-    top: -10px;
+    top: 50%;
+    margin-top: -12px;      /* la mitad de la altura (24px) para centrarlo sin usar transform */
     right: -10px;
     min-width: 24px;
     height: 24px;
@@ -127,7 +128,7 @@
   /* Espacios angostos (por ejemplo, 2 barras de Google Sites) */
   @media (max-width: 200px) {
     .boton { font-size: 14px; padding: 6px 8px; min-height: 36px; gap: 6px; }
-    .globo { min-width: 22px; height: 22px; font-size: 12px; }
+    .globo { min-width: 22px; height: 22px; margin-top: -11px; font-size: 12px; }
   }
   @media (max-width: 150px) {
     .boton { font-size: 13px; padding: 5px 6px; gap: 5px; }
