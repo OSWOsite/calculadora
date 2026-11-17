@@ -132,16 +132,41 @@
 </button>
 
 <script>
-  // JSON con todos los artículos (productos.json en el repo calculadora).
-  var JSON_URL = "https://raw.githubusercontent.com/OSWOsite/calculadora/main/productos.json";
+  // JSON con todos los artículos. Se busca primero junto a este archivo (GitHub Pages)
+  // y, si falla, en el archivo raw del repositorio.
+  var JSON_LOCAL = "productos.json";
+  var JSON_RAW = "https://raw.githubusercontent.com/OSWOsite/calculadora/main/productos.json";
 
   var boton = document.getElementById("boton");
   var timer;
 
-  // Lee el código de la URL del botón: boton-copiar-json.html?sku=7
-  // y lo agrega al enlace copiado (?sku=7). GitHub lo ignora; sirve para identificar el artículo.
-  var sku = (new URLSearchParams(window.location.search).get("sku") || "").trim();
-  var ENLACE = sku ? JSON_URL + "?sku=" + encodeURIComponent(sku) : JSON_URL;
+  // Código del artículo desde la URL del botón: boton-copiar-json.html?sku=7
+  // Si la URL no trae ?sku= (por ejemplo, en la previsualización), usa este código de prueba.
+  // Para que sin código no copie nada, déjalo vacío: "".
+  var SKU_PRUEBA = "7";
+  var sku = (new URLSearchParams(window.location.search).get("sku") || SKU_PRUEBA).trim();
+  var enlace = ""; // se llena con el campo "URL" del artículo
+
+  function cargarJSON(url) {
+    return fetch(url, { cache: "no-store" }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    });
+  }
+
+  function buscarEnlace(lista) {
+    for (var i = 0; i < lista.length; i++) {
+      if (String(lista[i]["Código"]).trim() === sku) return lista[i]["URL"] || "";
+    }
+    return "";
+  }
+
+  // Se carga desde el inicio para que, al hacer clic, la copia sea inmediata
+  var listo = sku
+    ? cargarJSON(JSON_LOCAL).catch(function () { return cargarJSON(JSON_RAW); })
+        .then(function (lista) { enlace = buscarEnlace(lista); return enlace; })
+        .catch(function () { return ""; })
+    : Promise.resolve("");
 
   function copiarRespaldo(texto) {
     // Respaldo para cuando el portapapeles moderno está bloqueado dentro del iframe
@@ -169,14 +194,20 @@
     }, 3000);
   }
 
-  boton.addEventListener("click", function () {
+  function copiar(texto) {
+    if (!texto) return;
     if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(ENLACE).then(mostrarCopiado, function () {
-        if (copiarRespaldo(ENLACE)) mostrarCopiado();
+      navigator.clipboard.writeText(texto).then(mostrarCopiado, function () {
+        if (copiarRespaldo(texto)) mostrarCopiado();
       });
-    } else if (copiarRespaldo(ENLACE)) {
+    } else if (copiarRespaldo(texto)) {
       mostrarCopiado();
     }
+  }
+
+  boton.addEventListener("click", function () {
+    if (enlace) copiar(enlace);          // ya cargado: copia al instante
+    else listo.then(copiar);             // aún cargando: espera y copia
   });
 </script>
 </body>
