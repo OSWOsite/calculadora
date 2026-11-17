@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Botón Copiar enlace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #0071c4;
+    --gris: #666666;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    background: transparent;
+    font-family: 'Fredoka', system-ui, sans-serif;
+  }
+  body {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 2px 2px 6px;
+  }
+  .boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 300px;
+    min-height: 40px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    border: 1px solid #c8c8c8;
+    background: linear-gradient(180deg, #ffffff 0%, #eef5fb 100%);
+    box-shadow:
+      inset 0 1px 0 #ffffff,
+      0 1px 2px rgba(0, 0, 0, .10),
+      0 4px 10px -3px rgba(0, 0, 0, .22);
+    color: var(--azul);
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.1;
+    white-space: nowrap;
+    letter-spacing: .2px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
+  }
+  .boton:hover {
+    background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
+    border-color: #a6a6a6;
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, .25),
+      0 6px 14px -4px rgba(0, 0, 0, .32);
+  }
+  .boton:active { transform: translateY(0); }
+  .boton:focus-visible {
+    outline: 3px solid rgba(0, 113, 196, .45);
+    outline-offset: 2px;
+  }
+
+  /* Los dos textos comparten la misma celda y se intercambian suavemente */
+  .texto {
+    display: grid;
+    overflow: hidden;
+    text-align: center;
+  }
+  .texto span {
+    grid-area: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: opacity 1s cubic-bezier(.4, 0, .2, 1), filter 1s cubic-bezier(.4, 0, .2, 1);
+  }
+  .t-copiar { transition-delay: .3s; }
+  .t-copiado { opacity: 0; filter: blur(10px); }
+  .boton.copiado .t-copiar {
+    opacity: 0;
+    filter: blur(10px);
+    transition-delay: 0s;
+  }
+  .boton.copiado .t-copiado {
+    opacity: 1;
+    filter: blur(0);
+    transition-delay: .3s;
+  }
+
+  .icono {
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Espacios angostos (por ejemplo, 2 barras de Google Sites) */
+  @media (max-width: 200px) {
+    .boton { font-size: 14px; padding: 6px 8px; min-height: 36px; }
+  }
+  @media (max-width: 150px) {
+    .boton { font-size: 13px; padding: 5px 6px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .boton, .texto span { transition: none; }
+    .boton:hover { transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<button id="boton" class="boton" type="button" aria-label="Copiar enlace">
+  <span class="texto" aria-live="polite">
+    <span class="t-copiar">
+      <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Copiar enlace
+    </span>
+    <span class="t-copiado" aria-hidden="true">
+      <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+      Enlace copiado
+    </span>
+  </span>
+</button>
+
+<script>
+  // JSON con todos los artículos (productos.json en el repo calculadora).
+  var JSON_URL = "https://raw.githubusercontent.com/OSWOsite/calculadora/main/productos.json";
+
+  var boton = document.getElementById("boton");
+  var timer;
+
+  // Lee el código de la URL del botón: boton-copiar-json.html?sku=7
+  // y lo agrega al enlace copiado (?sku=7). GitHub lo ignora; sirve para identificar el artículo.
+  var sku = (new URLSearchParams(window.location.search).get("sku") || "").trim();
+  var ENLACE = sku ? JSON_URL + "?sku=" + encodeURIComponent(sku) : JSON_URL;
+
+  function copiarRespaldo(texto) {
+    // Respaldo para cuando el portapapeles moderno está bloqueado dentro del iframe
+    var t = document.createElement("textarea");
+    t.value = texto;
+    t.setAttribute("readonly", "");
+    t.style.position = "fixed";
+    t.style.opacity = "0";
+    document.body.appendChild(t);
+    t.select();
+    t.setSelectionRange(0, t.value.length);
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) {}
+    document.body.removeChild(t);
+    return ok;
+  }
+
+  function mostrarCopiado() {
+    boton.classList.add("copiado");
+    boton.setAttribute("aria-label", "Enlace copiado");
+    clearTimeout(timer);
+    timer = setTimeout(function () {
+      boton.classList.remove("copiado");
+      boton.setAttribute("aria-label", "Copiar enlace");
+    }, 3000);
+  }
+
+  boton.addEventListener("click", function () {
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(ENLACE).then(mostrarCopiado, function () {
+        if (copiarRespaldo(ENLACE)) mostrarCopiado();
+      });
+    } else if (copiarRespaldo(ENLACE)) {
+      mostrarCopiado();
+    }
+  });
+</script>
+</body>
+</html>
