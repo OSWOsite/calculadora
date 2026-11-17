@@ -54,7 +54,7 @@
             min-height: 80px;
         }
 
-        /* ÚNICO texto con tamaño distinto: el título */
+        /* Título: tamaño distinto */
         .categoria {
             font-size: 20px;
             font-weight: 400;
@@ -79,7 +79,7 @@
 
         .precio {
             color: var(--gris);
-            font-size: 20px;
+            font-size: 28px; /* antes 20px (+8px) */
             transition: color 0.4s ease;
         }
 
@@ -112,7 +112,7 @@
 
         .precio-nuevo {
             color: var(--azul);
-            font-size: 20px;
+            font-size: 28px; /* antes 20px (+8px) */
             white-space: nowrap;
         }
 
@@ -190,25 +190,6 @@
             -webkit-tap-highlight-color: transparent;
             transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
         }
-        .btn-canti:hover,
-        .btn-accion:hover {
-            background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
-            border-color: #a6a6a6;
-            color: #ffffff;
-            transform: translateY(-1px);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, .25),
-                0 6px 14px -4px rgba(0, 0, 0, .32);
-        }
-        .btn-canti:active,
-        .btn-accion:active { transform: translateY(0); }
-        .btn-canti:focus-visible,
-        .btn-accion:focus-visible {
-            outline: 3px solid rgba(0, 113, 196, .45);
-            outline-offset: 2px;
-        }
-
-        .btn-ws { margin-bottom: 4px; }
 
         /* Botón principal: azul sólido */
         .btn-cart {
@@ -220,15 +201,48 @@
                 0 1px 2px rgba(0, 0, 0, .15),
                 0 4px 10px -3px rgba(0, 95, 163, .5);
         }
-        .btn-cart:hover {
+
+        /* Hover solo en dispositivos con mouse (evita que quede pegado en móviles) */
+        @media (hover: hover) and (pointer: fine) {
+            .btn-canti:hover,
+            .btn-accion:hover {
+                background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
+                border-color: #a6a6a6;
+                color: #ffffff;
+                transform: translateY(-1px);
+                box-shadow:
+                    inset 0 1px 0 rgba(255, 255, 255, .25),
+                    0 6px 14px -4px rgba(0, 0, 0, .32);
+            }
+            .btn-cart:hover {
+                background: linear-gradient(180deg, #0a7bd0 0%, #005fa3 100%);
+                border-color: #004f88;
+                color: #ffffff;
+                box-shadow:
+                    inset 0 1px 0 rgba(255, 255, 255, .2),
+                    0 6px 14px -4px rgba(0, 95, 163, .6);
+            }
+        }
+
+        /* Respuesta al toque: solo dura mientras se presiona */
+        .btn-canti:active,
+        .btn-accion:active {
+            transform: translateY(0);
+            background: linear-gradient(180deg, #e3eef8 0%, #d5e6f5 100%);
+        }
+        .btn-cart:active {
             background: linear-gradient(180deg, #0a7bd0 0%, #005fa3 100%);
             border-color: #004f88;
             color: #ffffff;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, .2),
-                0 6px 14px -4px rgba(0, 95, 163, .6);
         }
 
+        .btn-canti:focus-visible,
+        .btn-accion:focus-visible {
+            outline: 3px solid rgba(0, 113, 196, .45);
+            outline-offset: 2px;
+        }
+
+        .btn-ws { margin-bottom: 4px; }
 
         .col-display-canti {
             flex: 1;
@@ -249,7 +263,7 @@
             background: transparent;
             text-align: center;
             color: var(--azul);
-            font-size: 20px;
+            font-size: 28px; /* antes 20px (+8px) */
         }
         .input-canti:focus { outline: none; }
 
@@ -281,6 +295,7 @@
             opacity: 0;
             transform: translateY(-6px);
             pointer-events: none;
+            -webkit-tap-highlight-color: transparent;
             transition: opacity 0.38s ease, transform 0.38s ease;
             z-index: 10;
         }
@@ -297,6 +312,7 @@
         }
 
         .aviso-texto {
+            flex: 1;
             color: #ffffff;
             letter-spacing: 0.3px;
             line-height: 1.35;
@@ -305,6 +321,12 @@
         .aviso-texto strong {
             font-weight: inherit;
             color: #ffffff;
+        }
+
+        .aviso-cerrar {
+            flex-shrink: 0;
+            color: rgba(255, 255, 255, .75);
+            line-height: 1;
         }
 
         /* ===== TOTAL: mismas columnas que la cantidad ===== */
@@ -326,7 +348,7 @@
             flex: 1;                 /* igual que la columna de la cantidad */
             text-align: center;      /* queda centrado justo bajo el número de cantidad */
             color: var(--azul);
-            font-size: 20px;
+            font-size: 28px;         /* antes 20px (+8px) */
         }
 
         .decimales {
@@ -389,7 +411,6 @@
 
         @media (prefers-reduced-motion: reduce) {
             .btn-canti, .btn-accion, .aviso-descuento, .precio, .precio-descuento-row { transition: none; }
-            .btn-canti:hover, .btn-accion:hover { transform: none; }
         }
     </style>
 </head>
@@ -407,8 +428,14 @@
     let umbralNumerico = 0;
     let descuentoPct = 0;
     let db = null;
-    let avisoMostrado = false;
-    let timeoutGlobo = null; // Guardará la referencia para limpiar animaciones previas
+    let timeoutGlobo = null;
+    let avisoMostrado = false; // el globo de cantidad solo aparece una vez
+
+    // Quita el foco de los botones tras tocarlos para que no queden "oprimidos" en móviles
+    document.addEventListener('click', function (e) {
+        const b = e.target.closest('.btn-canti, .btn-accion');
+        if (b) setTimeout(() => b.blur(), 0);
+    });
 
     function inicializarDB() {
         return new Promise((resolve, reject) => {
@@ -497,9 +524,10 @@
                 </div>
 
                 <div class="aviso-wrapper">
-                    <div class="aviso-descuento" id="aviso-desc">
+                    <div class="aviso-descuento" id="aviso-desc" onclick="cerrarGlobo()">
                         <span class="aviso-icono" id="aviso-icono">🏷️</span>
                         <span class="aviso-texto" id="aviso-texto"></span>
+                        <span class="aviso-cerrar" id="aviso-cerrar" aria-hidden="true">✕</span>
                     </div>
                 </div>
 
@@ -550,6 +578,7 @@
         input.value = nuevaCantidad;
         cantidad = nuevaCantidad;
         actualizarUI();
+        mostrarAvisoCantidad();
     }
 
     function validarInput(input) {
@@ -557,13 +586,17 @@
         if (valor < 1 || isNaN(valor)) valor = 1;
         cantidad = valor;
         actualizarUI();
+        mostrarAvisoCantidad();
     }
 
-    // Lógica encargada de gestionar la animación suave de salida para cualquier globo
+    /* ---------- Globo flotante ---------- */
+
+    // duracion = 0 → el globo se queda hasta que se toque
     function lanzarGloboDinamico(texto, icono = "🏷️", duracion = 3500) {
         const avisoDesc = document.getElementById('aviso-desc');
         const avisoTexto = document.getElementById('aviso-texto');
         const avisoIcono = document.getElementById('aviso-icono');
+        const avisoCerrar = document.getElementById('aviso-cerrar');
 
         if (!avisoDesc) return;
 
@@ -572,18 +605,41 @@
 
         avisoIcono.textContent = icono;
         avisoTexto.innerHTML = texto;
+        avisoCerrar.style.display = duracion === 0 ? '' : 'none';
         avisoDesc.classList.add('visible');
 
-        // Se quita suavemente con la transición CSS tras completarse los segundos establecidos
-        timeoutGlobo = setTimeout(() => {
-            avisoDesc.classList.remove('visible');
-        }, duracion);
+        if (duracion > 0) {
+            timeoutGlobo = setTimeout(() => {
+                avisoDesc.classList.remove('visible');
+            }, duracion);
+        }
+    }
+
+    function cerrarGlobo() {
+        clearTimeout(timeoutGlobo);
+        const avisoDesc = document.getElementById('aviso-desc');
+        if (avisoDesc) avisoDesc.classList.remove('visible');
+    }
+
+    // Aviso que aparece UNA sola vez al modificar la cantidad inicial
+    // y solo se cierra al tocarlo. No aparece si el descuento es 0%.
+    function mostrarAvisoCantidad() {
+        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
+        if (!tieneDescuento || avisoMostrado) return;
+
+        const unidad = productoActual.Unidad || 'PIEZAS';
+        const faltantes = umbralNumerico - cantidad;
+
+        const texto = faltantes > 0
+            ? `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`
+            : `¡Descuento del <strong>${descuentoPct}%</strong> aplicado!`;
+
+        lanzarGloboDinamico(texto, "🏷️", 0);
+        avisoMostrado = true;
     }
 
     function actualizarUI() {
         const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
-        const unidad = productoActual.Unidad || 'PIEZAS';
-        const umbral75 = umbralNumerico * 0.75;
         const descuentoAplicado = tieneDescuento && cantidad >= umbralNumerico;
 
         const precioFinal = descuentoAplicado
@@ -611,21 +667,6 @@
             precioBase.classList.remove('reducido');
             precioEntero.classList.remove('precio-entero-tachado');
             precioDesRow.classList.remove('visible');
-        }
-
-        const avisoDesc = document.getElementById('aviso-desc');
-
-        // Modificación del aviso original de descuento para usar desvanecimiento controlado
-        if (!descuentoAplicado && cantidad > umbral75 && !avisoMostrado) {
-            const faltantes = umbralNumerico - cantidad;
-            const textoMensaje = `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`;
-
-            lanzarGloboDinamico(textoMensaje, "🏷️", 4000);
-            avisoMostrado = true;
-        }
-
-        if (descuentoAplicado && avisoDesc && avisoDesc.classList.contains('visible')) {
-            avisoDesc.classList.remove('visible');
         }
     }
 
@@ -667,13 +708,12 @@
         const requestAdd = store.put(item);
 
         requestAdd.onsuccess = function() {
-            lanzarGloboDinamico("¡AGREGADO AL CARRITO CON ÉXITO!", "🛒", 3000);
-
             const input = document.getElementById('cant-input');
             input.value = 1;
             cantidad = 1;
-            avisoMostrado = false; // Permite que se vuelva a recalcular alertas de umbrales
             actualizarUI();
+            // Confirmación breve (se cierra sola a los 3 s o al tocarla)
+            lanzarGloboDinamico("¡AGREGADO AL CARRITO CON ÉXITO!", "🛒", 3000);
         };
 
         requestAdd.onerror = function() {
