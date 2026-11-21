@@ -1,741 +1,219 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Producto - Minimalista</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap" rel="stylesheet">
-
-    <style>
-        :root {
-            --azul: #0071c4;
-            --gris: #666666;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Fredoka', sans-serif;
-            text-transform: uppercase;
-        }
-
-        body {
-            background-color: #ffffff;
-            padding: 0;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            /* TAMAÑO Y FORMATO ÚNICO para todos los textos (el título lo cambia aparte) */
-            font-size: 16px;
-            font-weight: 500;
-        }
-
-        button, input {
-            font-size: inherit;
-            font-weight: inherit;
-        }
-
-        .card {
-            background: #ffffff;
-            border-radius: 0;
-            padding: 0 0 20px 0;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: none;
-            border: none;
-        }
-
-        .info-producto {
-            margin-bottom: 30px;
-            text-align: left;
-            min-height: 80px;
-        }
-
-        /* Título: tamaño distinto */
-        .categoria {
-            font-size: 20px;
-            font-weight: 400;
-            color: var(--azul);
-            margin-bottom: 6px;
-        }
-
-        .modelo {
-            color: var(--gris);
-            letter-spacing: 1px;
-            margin-bottom: 14px;
-        }
-
-        .precio-wrapper {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-            overflow: hidden;
-        }
-
-        .precio {
-            color: var(--gris);
-            font-size: 28px; /* antes 20px (+8px) */
-            transition: color 0.4s ease;
-        }
-
-        .precio.reducido {
-            color: #cccccc;
-        }
-
-        .precio-entero-tachado {
-            text-decoration: line-through;
-        }
-
-        .unidad { color: var(--gris); font-size: 16px; }
-        .unidad.azul { color: var(--azul); }
-
-        .precio-descuento-row {
-            position: absolute;
-            right: 0;
-            top: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.35s ease;
-        }
-
-        .precio-descuento-row.visible {
-            opacity: 1;
-        }
-
-        .precio-nuevo {
-            color: var(--azul);
-            font-size: 28px; /* antes 20px (+8px) */
-            white-space: nowrap;
-        }
-
-        .badge-descuento {
-            color: #ffffff;
-            background: var(--azul);
-            padding: 4px 10px;
-            border-radius: 6px;
-            letter-spacing: 0.5px;
-            white-space: nowrap;
-        }
-
-        .seccion-interactiva {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .panel-cantidad {
-            display: flex;
-            background: transparent;
-            padding: 15px 0;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-        }
-
-        /* Líneas degradadas superior e inferior (reemplazan los bordes) */
-        .panel-cantidad::before,
-        .panel-cantidad::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(
-                90deg,
-                rgba(255,255,255,0),
-                #7b7b7b,
-                rgba(255,255,255,0)
-            );
-        }
-        .panel-cantidad::before { top: 0; }
-        .panel-cantidad::after { bottom: 0; }
-
-        .col-botones-canti {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            width: 45%;
-        }
-
-        /* ---------- Diseño unificado de botones (cristal claro) ---------- */
-        .btn-canti,
-        .btn-accion {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            min-height: 40px;
-            padding: 7px 12px;
-            border-radius: 6px;
-            border: 1px solid #c8c8c8;
-            background: linear-gradient(180deg, #ffffff 0%, #eef5fb 100%);
-            box-shadow:
-                inset 0 1px 0 #ffffff,
-                0 1px 2px rgba(0, 0, 0, .10),
-                0 4px 10px -3px rgba(0, 0, 0, .22);
-            color: var(--azul);
-            line-height: 1.1;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            transition: transform .18s ease, box-shadow .18s ease, background .18s ease, color .18s ease, border-color .18s ease;
-        }
-
-        /* Botón principal: azul sólido */
-        .btn-cart {
-            background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
-            border-color: #005fa3;
-            color: #ffffff;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, .25),
-                0 1px 2px rgba(0, 0, 0, .15),
-                0 4px 10px -3px rgba(0, 95, 163, .5);
-        }
-
-        /* Hover solo en dispositivos con mouse (evita que quede pegado en móviles) */
-        @media (hover: hover) and (pointer: fine) {
-            .btn-canti:hover,
-            .btn-accion:hover {
-                background: linear-gradient(180deg, #1a86d6 0%, var(--azul) 100%);
-                border-color: #a6a6a6;
-                color: #ffffff;
-                transform: translateY(-1px);
-                box-shadow:
-                    inset 0 1px 0 rgba(255, 255, 255, .25),
-                    0 6px 14px -4px rgba(0, 0, 0, .32);
-            }
-            .btn-cart:hover {
-                background: linear-gradient(180deg, #0a7bd0 0%, #005fa3 100%);
-                border-color: #004f88;
-                color: #ffffff;
-                box-shadow:
-                    inset 0 1px 0 rgba(255, 255, 255, .2),
-                    0 6px 14px -4px rgba(0, 95, 163, .6);
-            }
-        }
-
-        /* Respuesta al toque: solo dura mientras se presiona */
-        .btn-canti:active,
-        .btn-accion:active {
-            transform: translateY(0);
-            background: linear-gradient(180deg, #e3eef8 0%, #d5e6f5 100%);
-        }
-        .btn-cart:active {
-            background: linear-gradient(180deg, #0a7bd0 0%, #005fa3 100%);
-            border-color: #004f88;
-            color: #ffffff;
-        }
-
-        .btn-canti:focus-visible,
-        .btn-accion:focus-visible {
-            outline: 3px solid rgba(0, 113, 196, .45);
-            outline-offset: 2px;
-        }
-
-        .btn-ws { margin-bottom: 4px; }
-
-        .col-display-canti {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .label-canti {
-            color: var(--gris);
-            margin-bottom: 6px;
-        }
-
-        .input-canti {
-            width: 100%;
-            border: none;
-            background: transparent;
-            text-align: center;
-            color: var(--azul);
-            font-size: 28px; /* antes 20px (+8px) */
-        }
-        .input-canti:focus { outline: none; }
-
-        .input-canti::-webkit-outer-spin-button,
-        .input-canti::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        .aviso-wrapper {
-            position: relative;
-            height: 0;
-            overflow: visible;
-        }
-
-        /* Estructura base unificada para todos los globos flotantes */
-        .aviso-descuento {
-            position: absolute;
-            top: -2px;
-            left: 0;
-            right: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 6px;
-            background: var(--azul);
-            padding: 11px 14px;
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(-6px);
-            pointer-events: none;
-            -webkit-tap-highlight-color: transparent;
-            transition: opacity 0.38s ease, transform 0.38s ease;
-            z-index: 10;
-        }
-
-        .aviso-descuento.visible {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        .aviso-icono {
-            flex-shrink: 0;
-            line-height: 1;
-        }
-
-        .aviso-texto {
-            flex: 1;
-            color: #ffffff;
-            letter-spacing: 0.3px;
-            line-height: 1.35;
-        }
-
-        .aviso-texto strong {
-            font-weight: inherit;
-            color: #ffffff;
-        }
-
-        .aviso-cerrar {
-            flex-shrink: 0;
-            color: rgba(255, 255, 255, .75);
-            line-height: 1;
-        }
-
-        /* ===== TOTAL: mismas columnas que la cantidad ===== */
-        .total-container {
-            position: relative;
-            overflow: visible;
-            display: flex;
-            align-items: center;
-            margin: 10px 0 20px 0;
-        }
-
-        .total-label {
-            width: 45%;              /* igual que la columna de botones */
-            color: var(--gris);
-            letter-spacing: 1px;
-        }
-
-        .total-val {
-            flex: 1;                 /* igual que la columna de la cantidad */
-            text-align: center;      /* queda centrado justo bajo el número de cantidad */
-            color: var(--azul);
-            font-size: 28px;         /* antes 20px (+8px) */
-        }
-
-        .decimales {
-            font-size: 0.65em;
-            vertical-align: super;
-        }
-
-        /* ===== FECHA DE ENTREGA (sin sombra) ===== */
-        #oswo-ultra-minimal {
-            width: 100%;
-            margin: 0;
-            padding: 28px 10px;
-            box-sizing: border-box;
-            background-color: #FFFFFF;
-            color: var(--gris);
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            position: relative;
-        }
-
-        /* Línea degradada superior */
-        #oswo-ultra-minimal::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(
-                90deg,
-                rgba(255,255,255,0),
-                #7b7b7b,
-                rgba(255,255,255,0)
-            );
-        }
-
-        #oswo-ultra-minimal .fecha {
-            display: block;
-            margin-top: 8px;
-            color: #b7b7b7;
-            letter-spacing: 1px;
-        }
-
-        .error-msg {
-            color: var(--gris);
-            text-align: center;
-            padding: 30px 0;
-        }
-
-        #loading {
-            text-align: center;
-            color: var(--gris);
-            padding: 30px 0;
-        }
-
-        @media (max-width: 600px) {
-            .card { padding: 0 0 15px 0; }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            .btn-canti, .btn-accion, .aviso-descuento, .precio, .precio-descuento-row { transition: none; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Calculadora de Producto</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--azul:#0071c4;--gris:#666666}
+*{box-sizing:border-box;margin:0;padding:0;font-family:'Fredoka',sans-serif;text-transform:uppercase}
+body{background:#fff;display:flex;justify-content:center;align-items:flex-start;min-height:100vh;font-size:16px;font-weight:500}
+button,input{font-size:inherit;font-weight:inherit}
+.card{background:#fff;padding:0 0 20px 0;max-width:400px;width:100%}
+.info-producto{margin-bottom:30px;text-align:left;min-height:80px}
+/* Modelo: +4px (16→20px) y menos separación entre letras (1px→0.4px) */
+.modelo{font-size:18px;letter-spacing:.2px;
+  color:var(--gris);  /* <<< COLOR DEL TITULO: GRIS #666666 ACTUAL. CAMBIALO POR UN HEX (EJ. #0071c4) O var(--azul) */
+  margin-bottom:50px;  /* <<< SEPARACION ENTRE TITULO Y PRECIO: AUMENTA EL VALOR PARA SEPARAR MAS, REDUCELO PARA ACERCAR */
+  font-weight:410;  /* <<< GROSOR DEL TEXTO (BOLD): 400 = NORMAL, 500 = MEDIO, 600+ = GRUESO */
+  position:relative;top:17px;  /* <<< BAJAR / SUBIR TITULO: VALOR POSITIVO BAJA (EJ. 6px), NEGATIVO SUBE (EJ. -6px) */
+}
+.precio-wrapper{position:relative;display:flex;flex-direction:column;align-items:flex-start;width:100%;overflow:hidden}
+.precio{color:var(--gris);font-size:28px;transition:color .4s ease}
+.precio.reducido{color:#ccc}
+.precio-entero-tachado{text-decoration:line-through}
+.unidad{color:var(--gris);font-size:16px}
+.unidad.azul{color:var(--azul)}
+.precio-descuento-row{position:absolute;right:0;top:0;display:flex;align-items:center;gap:10px;pointer-events:none;opacity:0;transition:opacity .35s ease}
+.precio-descuento-row.visible{opacity:1}
+.precio-nuevo{color:var(--azul);font-size:28px;white-space:nowrap}
+.badge-descuento{color:#fff;background:var(--azul);padding:4px 10px;border-radius:6px;letter-spacing:.5px;white-space:nowrap}
+.seccion-interactiva{display:flex;flex-direction:column;gap:16px}
+.panel-cantidad{display:flex;padding:15px 0;align-items:center;justify-content:space-between;position:relative}
+.panel-cantidad::before,.panel-cantidad::after{content:"";position:absolute;left:0;width:100%;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0),#7b7b7b,rgba(255,255,255,0))}
+.panel-cantidad::before{top:0}.panel-cantidad::after{bottom:0}
+.col-botones-canti{display:flex;flex-direction:column;gap:8px;width:45%}
+.btn-canti,.btn-accion{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:40px;padding:7px 12px;border-radius:6px;border:1px solid #c8c8c8;background:linear-gradient(180deg,#fff 0%,#eef5fb 100%);box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.10),0 4px 10px -3px rgba(0,0,0,.22);color:var(--azul);line-height:1.1;letter-spacing:.5px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .18s ease,box-shadow .18s ease,background .18s ease,color .18s ease,border-color .18s ease}
+.btn-cart{background:linear-gradient(180deg,#1a86d6 0%,var(--azul) 100%);border-color:#005fa3;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 1px 2px rgba(0,0,0,.15),0 4px 10px -3px rgba(0,95,163,.5)}
+@media (hover:hover) and (pointer:fine){
+.btn-canti:hover,.btn-accion:hover{background:linear-gradient(180deg,#1a86d6 0%,var(--azul) 100%);border-color:#a6a6a6;color:#fff;transform:translateY(-1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 6px 14px -4px rgba(0,0,0,.32)}
+.btn-cart:hover{background:linear-gradient(180deg,#0a7bd0 0%,#005fa3 100%);border-color:#004f88;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 6px 14px -4px rgba(0,95,163,.6)}}
+.btn-canti:active,.btn-accion:active{transform:translateY(0);background:linear-gradient(180deg,#e3eef8 0%,#d5e6f5 100%)}
+.btn-cart:active{background:linear-gradient(180deg,#0a7bd0 0%,#005fa3 100%);border-color:#004f88;color:#fff}
+.btn-canti:focus-visible,.btn-accion:focus-visible{outline:3px solid rgba(0,113,196,.45);outline-offset:2px}
+.btn-ws{margin-bottom:4px}
+.col-display-canti{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+/* Formato unificado: CANTIDAD, TOTAL ESTIMADO y PIDA HOY Y RECIBA EL */
+.label-canti,.total-label,#oswo-ultra-minimal .texto{color:var(--gris);font-size:16px;font-weight:410;letter-spacing:.2px;line-height:1.2}
+.label-canti{margin-bottom:6px}
+.input-canti{width:100%;border:none;background:transparent;text-align:center;color:var(--azul);font-size:28px}
+.input-canti:focus{outline:none}
+.input-canti::-webkit-outer-spin-button,.input-canti::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.aviso-wrapper{position:relative;height:0;overflow:visible}
+/* GLOBO: CUBRE LA COLUMNA DE LOS BOTONES + Y - */
+.aviso-descuento{position:absolute;
+  top:8px;bottom:8px;  /* <<< ALTO DEL GLOBO: REDUCE LOS VALORES PARA HACERLO MAS ALTO, AUMENTALOS PARA HACERLO MAS BAJO */
+  left:0;width:45%;  /* <<< ANCHO DEL GLOBO: 45% = MISMO ANCHO QUE LOS BOTONES */
+  display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;border-radius:6px;background:var(--azul);color:#fff;padding:6px 8px;cursor:pointer;opacity:0;transform:translateY(-6px);pointer-events:none;-webkit-tap-highlight-color:transparent;box-shadow:0 6px 16px -4px rgba(0,95,163,.55);transition:opacity .38s ease,transform .38s ease;z-index:10}
+.aviso-descuento.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+.av-sup{font-size:12px;letter-spacing:1px;opacity:.85;line-height:1.1}   /* LINEA SUPERIOR (EJ. COMPRA) */
+.av-cifra{font-size:20px;letter-spacing:.2px;line-height:1.15}            /* CANTIDAD DE PIEZAS (LA MAS GRANDE) */
+.av-pie{font-size:14px;line-height:1.2}                                    /* LINEA INFERIOR (EJ. Y AHORRA 10%) */
+.aviso-texto{display:flex;flex-direction:column;align-items:center;gap:3px}
+.av-pie b{font-weight:500;background:#fff;color:var(--azul);padding:1px 6px;border-radius:4px}  /* PORCENTAJE RESALTADO EN BLANCO */
+.aviso-cerrar{position:absolute;top:5px;right:8px;font-size:11px;color:rgba(255,255,255,.8);line-height:1}
+.total-container{position:relative;overflow:visible;display:flex;align-items:center;margin:10px 0 20px 0}
+.total-label{width:45%}
+.total-val{flex:1;text-align:center;color:var(--azul);font-size:28px}
+.decimales{font-size:.65em;vertical-align:super}
+#oswo-ultra-minimal{width:100%;padding:28px 10px;background:#fff;color:var(--gris);text-align:center;letter-spacing:1px;position:relative}
+#oswo-ultra-minimal::before{content:"";position:absolute;top:0;left:0;width:100%;height:1px;background:linear-gradient(90deg,rgba(255,255,255,0),#7b7b7b,rgba(255,255,255,0))}
+#oswo-ultra-minimal .fecha{display:block;margin-top:8px;color:#b7b7b7;letter-spacing:1px}
+.error-msg,#loading{color:var(--gris);text-align:center;padding:30px 0}
+@media (max-width:600px){.card{padding:0 0 15px 0}}
+@media (prefers-reduced-motion:reduce){.btn-canti,.btn-accion,.aviso-descuento,.precio,.precio-descuento-row{transition:none}}
+</style>
 </head>
 <body>
-
-<div class="card" id="calc-container">
-    <div id="loading">Cargando producto...</div>
-</div>
+<div class="card" id="calc-container"><div id="loading">Cargando producto...</div></div>
 
 <script>
-    const TELEFONO_WHATSAPP = "525521133250";
-    let productoActual = null;
-    let cantidad = 1;
-    let precioNumerico = 0;
-    let umbralNumerico = 0;
-    let descuentoPct = 0;
-    let db = null;
-    let timeoutGlobo = null;
-    let avisoMostrado = false; // el globo de cantidad solo aparece una vez
+const TELEFONO_WHATSAPP="525521133250";
 
-    // Quita el foco de los botones tras tocarlos para que no queden "oprimidos" en móviles
-    document.addEventListener('click', function (e) {
-        const b = e.target.closest('.btn-canti, .btn-accion');
-        if (b) setTimeout(() => b.blur(), 0);
-    });
+let productoActual=null,cantidad=1,precioNumerico=0,umbralNumerico=0,descuentoPct=0,db=null,timeoutGlobo=null,avisoMostrado=false;
 
-    function inicializarDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open("CatalogoDB", 1);
-            request.onupgradeneeded = function(e) {
-                const database = e.target.result;
-                if (!database.objectStoreNames.contains("carrito")) {
-                    database.createObjectStore("carrito", { keyPath: "codigo" });
-                }
-            };
-            request.onsuccess = function(e) { db = e.target.result; resolve(db); };
-            request.onerror = function(e) { reject(e.target.error); };
-        });
-    }
+document.addEventListener('click',e=>{const b=e.target.closest('.btn-canti, .btn-accion');if(b)setTimeout(()=>b.blur(),0)});
 
-    function cargarProducto(idProducto) {
-        const container = document.getElementById('calc-container');
-        fetch('productos.json')
-            .then(response => {
-                if (!response.ok) throw new Error("Error al cargar JSON");
-                return response.json();
-            })
-            .then(productosDB => {
-                productoActual = productosDB.find(p => String(p.Código) === String(idProducto));
-                if (productoActual) {
-                    precioNumerico = parseFloat(productoActual.Precio.replace('$', '').replace(',', ''));
-                    umbralNumerico = parseInt(productoActual.Umbral) || 0;
-                    descuentoPct = parseFloat(productoActual.Descuento) || 0;
-                    renderCalculadora();
-                } else {
-                    container.innerHTML = `<div class="error-msg">Código #${idProducto} no encontrado en inventario.</div>`;
-                }
-            })
-            .catch(error => {
-                container.innerHTML = `<div class="error-msg">Error de conexión o archivo productos.json ausente.</div>`;
-                console.error(error);
-            });
-    }
+function inicializarDB(){return new Promise((res,rej)=>{
+  try{const r=indexedDB.open("CatalogoDB",1);
+  r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains("carrito"))d.createObjectStore("carrito",{keyPath:"codigo"})};
+  r.onsuccess=e=>{db=e.target.result;res(db)};r.onerror=e=>rej(e.target.error);}catch(err){rej(err)}})}
 
-    window.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const idProducto = urlParams.get('id');
-        const container = document.getElementById('calc-container');
+function usarProducto(lista,id){
+  productoActual=lista.find(p=>String(p.Código)===String(id));
+  const c=document.getElementById('calc-container');
+  if(!productoActual){c.innerHTML=`<div class="error-msg">Código #${id} no encontrado en inventario.</div>`;return}
+  precioNumerico=parseFloat(productoActual.Precio.replace('$','').replace(',',''));
+  umbralNumerico=parseInt(productoActual.Umbral)||0;
+  descuentoPct=parseFloat(productoActual.Descuento)||0;
+  document.title=productoActual.Modelo;
+  renderCalculadora();
+}
+function cargarProducto(id){
+  const c=document.getElementById('calc-container');
+  fetch('productos.json').then(r=>{if(!r.ok)throw new Error("Error al cargar JSON");return r.json()})
+    .then(l=>usarProducto(l,id))
+    .catch(err=>{c.innerHTML=`<div class="error-msg">Error de conexión o archivo productos.json ausente.</div>`;console.error(err)});
+}
 
-        if (!idProducto) {
-            container.innerHTML = `<div class="error-msg">Falta especificar el ID en la URL (?id=CODIGO)</div>`;
-            return;
-        }
+window.addEventListener('DOMContentLoaded',()=>{
+  const id=new URLSearchParams(location.search).get('id');
+  if(!id){document.getElementById('calc-container').innerHTML=`<div class="error-msg">Falta especificar el ID en la URL (?id=CODIGO)</div>`;return}
+  inicializarDB().catch(()=>{}).then(()=>cargarProducto(id));
+});
 
-        inicializarDB()
-            .then(() => cargarProducto(idProducto))
-            .catch(error => {
-                container.innerHTML = `<div class="error-msg">Error de base de datos: ${error.message}</div>`;
-            });
-    });
+function renderCalculadora(){
+  const c=document.getElementById('calc-container');
+  const td=descuentoPct>0&&umbralNumerico>0;
+  c.innerHTML=`
+  <div class="info-producto">
+    <div class="modelo">${productoActual.Modelo}</div>
+    <div class="precio-wrapper">
+      <span class="precio" id="precio-base"><span id="precio-entero">${formatEntero(precioNumerico)}</span><span class="decimales" id="precio-cents">.${formatCents(precioNumerico)}</span> <span class="unidad">C/U</span></span>
+      ${td?`<div class="precio-descuento-row" id="precio-descuento-row"><span class="precio-nuevo" id="precio-nuevo"></span><span class="badge-descuento" id="badge-desc"></span></div>`:''}
+    </div>
+  </div>
+  <div class="seccion-interactiva">
+    <div class="panel-cantidad">
+      <div class="aviso-descuento" id="aviso-desc" onclick="cerrarGlobo()">
+        <span class="aviso-texto" id="aviso-texto"></span>
+        <span class="aviso-cerrar" id="aviso-cerrar" aria-hidden="true">✕</span>
+      </div>
+      <div class="col-botones-canti">
+        <button class="btn-canti" onclick="modificarCantidad(1)" aria-label="Aumentar cantidad">+</button>
+        <button class="btn-canti" onclick="modificarCantidad(-1)" aria-label="Disminuir cantidad">-</button>
+      </div>
+      <div class="col-display-canti">
+        <span class="label-canti">Cantidad</span>
+        <input type="number" class="input-canti" id="cant-input" value="1" min="1" oninput="validarInput(this)">
+      </div>
+    </div>
+    <div class="aviso-wrapper"></div>
+    <div class="total-container" style="margin-top:10px;">
+      <span class="total-label">Total estimado:</span>
+      <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
+    </div>
+    <button class="btn-accion btn-ws" onclick="enviarWhatsApp()">Pedir por WhatsApp</button>
+    <button class="btn-accion btn-cart" onclick="agregarAlCarrito()">Agregar al carrito</button>
+    <div id="oswo-ultra-minimal"><div class="texto">PIDA HOY Y RECIBA EL<span class="fecha" id="fecha-entrega"></span></div></div>
+  </div>`;
+  actualizarUI();calcularProximoDiaHabil();
+}
 
-    function renderCalculadora() {
-        const container = document.getElementById('calc-container');
-        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
+function formatMonto(m){const p=m.toFixed(2).split('.');return `${parseFloat(p[0]).toLocaleString('es-MX')}<span class="decimales">.${p[1]}</span>`}
+function formatEntero(m){return parseFloat(m.toFixed(2).split('.')[0]).toLocaleString('es-MX')}
+function formatCents(m){return m.toFixed(2).split('.')[1]}
 
-        container.innerHTML = `
-            <div class="info-producto">
-                <div class="categoria">${productoActual.Categoria}</div>
-                <div class="modelo">${productoActual.Modelo}</div>
-                <div class="precio-wrapper">
-                    <span class="precio" id="precio-base"><span id="precio-entero">${formatEntero(precioNumerico)}</span><span class="decimales" id="precio-cents">.${formatCents(precioNumerico)}</span> <span class="unidad">C/U</span></span>
-                    ${tieneDescuento ? `
-                    <div class="precio-descuento-row" id="precio-descuento-row">
-                        <span class="precio-nuevo" id="precio-nuevo"></span>
-                        <span class="badge-descuento" id="badge-desc"></span>
-                    </div>
-                    ` : ''}
-                </div>
-            </div>
+function modificarCantidad(v){const i=document.getElementById('cant-input');let n=(parseInt(i.value)||1)+v;if(n<1)n=1;i.value=n;cantidad=n;actualizarUI();mostrarAvisoCantidad()}
+function validarInput(i){let v=parseInt(i.value);if(v<1||isNaN(v))v=1;cantidad=v;actualizarUI();mostrarAvisoCantidad()}
 
-            <div class="seccion-interactiva">
-                <div class="panel-cantidad">
-                    <div class="col-botones-canti">
-                        <button class="btn-canti" onclick="modificarCantidad(1)" aria-label="Aumentar cantidad">+</button>
-                        <button class="btn-canti" onclick="modificarCantidad(-1)" aria-label="Disminuir cantidad">-</button>
-                    </div>
-                    <div class="col-display-canti">
-                        <span class="label-canti">Cantidad</span>
-                        <input type="number" class="input-canti" id="cant-input" value="1" min="1" oninput="validarInput(this)">
-                    </div>
-                </div>
+function lanzarGloboDinamico(texto,icono="🏷️",duracion=3500){
+  const a=document.getElementById('aviso-desc');if(!a)return;
+  clearTimeout(timeoutGlobo);
+  
+  document.getElementById('aviso-texto').innerHTML=texto;
+  document.getElementById('aviso-cerrar').style.display=duracion===0?'':'none';
+  a.classList.add('visible');
+  if(duracion>0)timeoutGlobo=setTimeout(()=>a.classList.remove('visible'),duracion);
+}
+const globo=(sup,cifra,pie)=>`<span class="av-sup">${sup}</span><span class="av-cifra">${cifra}</span><span class="av-pie">${pie}</span>`;
+function cerrarGlobo(){clearTimeout(timeoutGlobo);const a=document.getElementById('aviso-desc');if(a)a.classList.remove('visible')}
 
-                <div class="aviso-wrapper">
-                    <div class="aviso-descuento" id="aviso-desc" onclick="cerrarGlobo()">
-                        <span class="aviso-icono" id="aviso-icono">🏷️</span>
-                        <span class="aviso-texto" id="aviso-texto"></span>
-                        <span class="aviso-cerrar" id="aviso-cerrar" aria-hidden="true">✕</span>
-                    </div>
-                </div>
+function mostrarAvisoCantidad(){
+  if(!(descuentoPct>0&&umbralNumerico>0)||avisoMostrado)return;
+  const u=productoActual.Unidad||'PIEZAS',aplicado=cantidad>=umbralNumerico;
+  lanzarGloboDinamico(aplicado
+    ?globo("¡APLICADO!",`-${descuentoPct}%`,`POR ${umbralNumerico}+ ${u}`)
+    :globo("COMPRA",`${umbralNumerico} ${u}`,`Y AHORRA <b>${descuentoPct}%</b>`),"",0);
+  avisoMostrado=true;
+}
 
-                <div class="total-container" style="margin-top: 10px;">
-                    <span class="total-label">Total estimado:</span>
-                    <span class="total-val" id="total-display">${formatMonto(precioNumerico)}</span>
-                </div>
+function actualizarUI(){
+  const td=descuentoPct>0&&umbralNumerico>0,da=td&&cantidad>=umbralNumerico;
+  const pf=da?precioNumerico*(1-descuentoPct/100):precioNumerico;
+  document.getElementById('total-display').innerHTML=formatMonto(cantidad*pf);
+  if(!td)return;
+  const pb=document.getElementById('precio-base'),pe=document.getElementById('precio-entero'),row=document.getElementById('precio-descuento-row');
+  if(da){pb.classList.add('reducido');pe.classList.add('precio-entero-tachado');
+    document.getElementById('precio-nuevo').innerHTML=formatMonto(pf)+' <span class="unidad azul">C/U</span>';
+    document.getElementById('badge-desc').textContent=`-${descuentoPct}%`;row.classList.add('visible')}
+  else{pb.classList.remove('reducido');pe.classList.remove('precio-entero-tachado');row.classList.remove('visible')}
+}
 
-                <button class="btn-accion btn-ws" onclick="enviarWhatsApp()">
-                    Pedir por WhatsApp
-                </button>
-                <button class="btn-accion btn-cart" onclick="agregarAlCarrito()">
-                    Agregar al carrito
-                </button>
+function precioEfectivo(){const td=descuentoPct>0&&umbralNumerico>0;return td&&cantidad>=umbralNumerico?precioNumerico*(1-descuentoPct/100):precioNumerico}
 
-                <div id="oswo-ultra-minimal">
-                    <div class="texto">
-                        PIDA HOY Y RECIBA EL
-                        <span class="fecha" id="fecha-entrega"></span>
-                    </div>
-                </div>
-            </div>
-        `;
+function enviarWhatsApp(){
+  const t=(cantidad*precioEfectivo()).toFixed(2);
+  const m=`Hola oswo, me interesa:\n${productoActual.Categoria} - ${productoActual.Modelo}\nCódigo: ${productoActual.Código}\nCantidad: ${cantidad} ${productoActual.Unidad||'piezas'}\nTotal: $${t}\n¿Me confirmas disponibilidad?`;
+  window.open(`https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(m)}`,'_blank');
+}
 
-        actualizarUI();
-        calcularProximoDiaHabil();
-    }
+function agregarAlCarrito(){
+  if(!db){alert("BASE DE DATOS NO LISTA. Intenta de nuevo.");return}
+  const p=precioEfectivo();
+  const item={codigo:String(productoActual.Código),categoria:productoActual.Categoria,modelo:productoActual.Modelo,cantidad:parseInt(cantidad),precioUnitario:p,total:parseFloat((cantidad*p).toFixed(2)),URL:productoActual.URL||'#',Unidad:productoActual.Unidad||'PIEZAS'};
+  const rq=db.transaction(["carrito"],"readwrite").objectStore("carrito").put(item);
+  rq.onsuccess=()=>{document.getElementById('cant-input').value=1;cantidad=1;actualizarUI();lanzarGloboDinamico(globo("🛒 ¡LISTO!","AGREGADO","AL CARRITO"),"",3000)};
+  rq.onerror=()=>alert("Error al agregar al carrito: "+rq.error);
+}
 
-    function formatMonto(monto) {
-        const partes = monto.toFixed(2).split('.');
-        const entero = parseFloat(partes[0]).toLocaleString('es-MX');
-        const decimales = partes[1];
-        return `${entero}<span class="decimales">.${decimales}</span>`;
-    }
-
-    function formatEntero(monto) {
-        return parseFloat(monto.toFixed(2).split('.')[0]).toLocaleString('es-MX');
-    }
-
-    function formatCents(monto) {
-        return monto.toFixed(2).split('.')[1];
-    }
-
-    function modificarCantidad(valor) {
-        const input = document.getElementById('cant-input');
-        let nuevaCantidad = (parseInt(input.value) || 1) + valor;
-        if (nuevaCantidad < 1) nuevaCantidad = 1;
-        input.value = nuevaCantidad;
-        cantidad = nuevaCantidad;
-        actualizarUI();
-        mostrarAvisoCantidad();
-    }
-
-    function validarInput(input) {
-        let valor = parseInt(input.value);
-        if (valor < 1 || isNaN(valor)) valor = 1;
-        cantidad = valor;
-        actualizarUI();
-        mostrarAvisoCantidad();
-    }
-
-    /* ---------- Globo flotante ---------- */
-
-    // duracion = 0 → el globo se queda hasta que se toque
-    function lanzarGloboDinamico(texto, icono = "🏷️", duracion = 3500) {
-        const avisoDesc = document.getElementById('aviso-desc');
-        const avisoTexto = document.getElementById('aviso-texto');
-        const avisoIcono = document.getElementById('aviso-icono');
-        const avisoCerrar = document.getElementById('aviso-cerrar');
-
-        if (!avisoDesc) return;
-
-        // Limpiamos timeouts previos si el usuario hace clics rápidos
-        clearTimeout(timeoutGlobo);
-
-        avisoIcono.textContent = icono;
-        avisoTexto.innerHTML = texto;
-        avisoCerrar.style.display = duracion === 0 ? '' : 'none';
-        avisoDesc.classList.add('visible');
-
-        if (duracion > 0) {
-            timeoutGlobo = setTimeout(() => {
-                avisoDesc.classList.remove('visible');
-            }, duracion);
-        }
-    }
-
-    function cerrarGlobo() {
-        clearTimeout(timeoutGlobo);
-        const avisoDesc = document.getElementById('aviso-desc');
-        if (avisoDesc) avisoDesc.classList.remove('visible');
-    }
-
-    // Aviso que aparece UNA sola vez al modificar la cantidad inicial
-    // y solo se cierra al tocarlo. No aparece si el descuento es 0%.
-    function mostrarAvisoCantidad() {
-        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
-        if (!tieneDescuento || avisoMostrado) return;
-
-        const unidad = productoActual.Unidad || 'PIEZAS';
-        const faltantes = umbralNumerico - cantidad;
-
-        const texto = faltantes > 0
-            ? `Agregue <strong>${faltantes} ${unidad}</strong> para obtener un descuento del <strong>${descuentoPct}%</strong>`
-            : `¡Descuento del <strong>${descuentoPct}%</strong> aplicado!`;
-
-        lanzarGloboDinamico(texto, "🏷️", 0);
-        avisoMostrado = true;
-    }
-
-    function actualizarUI() {
-        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
-        const descuentoAplicado = tieneDescuento && cantidad >= umbralNumerico;
-
-        const precioFinal = descuentoAplicado
-            ? precioNumerico * (1 - descuentoPct / 100)
-            : precioNumerico;
-
-        const total = cantidad * precioFinal;
-        document.getElementById('total-display').innerHTML = formatMonto(total);
-
-        if (!tieneDescuento) return;
-
-        const precioBase = document.getElementById('precio-base');
-        const precioEntero = document.getElementById('precio-entero');
-        const precioDesRow = document.getElementById('precio-descuento-row');
-        const precioNuevo = document.getElementById('precio-nuevo');
-        const badgeDesc = document.getElementById('badge-desc');
-
-        if (descuentoAplicado) {
-            precioBase.classList.add('reducido');
-            precioEntero.classList.add('precio-entero-tachado');
-            precioNuevo.innerHTML = formatMonto(precioFinal) + ' <span class="unidad azul">C/U</span>';
-            badgeDesc.textContent = `-${descuentoPct}%`;
-            precioDesRow.classList.add('visible');
-        } else {
-            precioBase.classList.remove('reducido');
-            precioEntero.classList.remove('precio-entero-tachado');
-            precioDesRow.classList.remove('visible');
-        }
-    }
-
-    function precioEfectivo() {
-        const tieneDescuento = descuentoPct > 0 && umbralNumerico > 0;
-        const descuentoAplicado = tieneDescuento && cantidad >= umbralNumerico;
-        return descuentoAplicado ? precioNumerico * (1 - descuentoPct / 100) : precioNumerico;
-    }
-
-    function enviarWhatsApp() {
-        const totalTexto = (cantidad * precioEfectivo()).toFixed(2);
-        const mensaje = `Hola oswo, me interesa:\n${productoActual.Categoria} - ${productoActual.Modelo}\nCódigo: ${productoActual.Código}\nCantidad: ${cantidad} ${productoActual.Unidad || 'piezas'}\nTotal: $${totalTexto}\n¿Me confirmas disponibilidad?`;
-        const urlWs = `https://wa.me/${TELEFONO_WHATSAPP}?text=${encodeURIComponent(mensaje)}`;
-        window.open(urlWs, '_blank');
-    }
-
-    function agregarAlCarrito() {
-        if (!db) {
-            alert("BASE DE DATOS NO LISTA. Intenta de nuevo.");
-            return;
-        }
-
-        const precio = precioEfectivo();
-        const total = parseFloat((cantidad * precio).toFixed(2));
-
-        const item = {
-            codigo: String(productoActual.Código),
-            categoria: productoActual.Categoria,
-            modelo: productoActual.Modelo,
-            cantidad: parseInt(cantidad),
-            precioUnitario: precio,
-            total: total,
-            URL: productoActual.URL || '#',
-            Unidad: productoActual.Unidad || 'PIEZAS'
-        };
-
-        const transaction = db.transaction(["carrito"], "readwrite");
-        const store = transaction.objectStore("carrito");
-        const requestAdd = store.put(item);
-
-        requestAdd.onsuccess = function() {
-            const input = document.getElementById('cant-input');
-            input.value = 1;
-            cantidad = 1;
-            actualizarUI();
-            // Confirmación breve (se cierra sola a los 3 s o al tocarla)
-            lanzarGloboDinamico("¡AGREGADO AL CARRITO CON ÉXITO!", "🛒", 3000);
-        };
-
-        requestAdd.onerror = function() {
-            alert("Error al agregar al carrito: " + requestAdd.error);
-        };
-    }
-
-    function calcularProximoDiaHabil() {
-        const hoy = new Date();
-        const diaSemana = hoy.getDay();
-        if (diaSemana === 5) hoy.setDate(hoy.getDate() + 1);
-        else if (diaSemana === 6) hoy.setDate(hoy.getDate() + 2);
-        else hoy.setDate(hoy.getDate() + 1);
-
-        const opciones = { weekday: 'long', day: 'numeric', month: 'long' };
-        const fechaFormateada = hoy.toLocaleDateString('es-ES', opciones).toUpperCase();
-
-        const contenedorFecha = document.getElementById("fecha-entrega");
-        if (contenedorFecha) {
-            contenedorFecha.innerText = fechaFormateada;
-        }
-    }
+function calcularProximoDiaHabil(){
+  const h=new Date(),d=h.getDay();
+  h.setDate(h.getDate()+(d===6?2:1));
+  const el=document.getElementById("fecha-entrega");
+  if(el)el.innerText=h.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}).toUpperCase();
+}
 </script>
 </body>
 </html>
